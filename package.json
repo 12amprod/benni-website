@@ -1,0 +1,50 @@
+{
+	"name": "benni-website",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"packageManager": "pnpm@12.3.4",
+	"engines": {
+		"node": ">=24"
+	},
+	"imports": {
+		"#/*": "./src/*"
+	},
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"typecheck": "tsc -b",
+		"lint": "biome lint",
+		"format": "biome format --write",
+		"check": "biome check",
+		"check:fix": "biome check --write",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"prepare": "husky"
+	},
+	"dependencies": {
+		"@tanstack/react-router": "1.170.35",
+		"@tanstack/react-start": "1.168.52",
+		"react": "19.3.0",
+		"react-dom": "19.3.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.13",
+		"@tailwindcss/vite": "4.3.3",
+		"@tanstack/react-router-devtools": "1.167.1",
+		"@testing-library/jest-dom": "7.0.1",
+		"@testing-library/react": "16.3.3",
+		"@types/node": "24.10.1",
+		"@types/react": "19.3.0",
+		"@types/react-dom": "19.3.0",
+		"@vitejs/plugin-react": "6.1.1",
+		"husky": "9.1.7",
+		"jsdom": "30.0.1",
+		"lint-staged": "17.5.1",
+		"tailwindcss": "4.3.3",
+		"typescript": "7.0.2",
+		"vite": "8.3.0",
+		"vitest": "5.0.0"
+	}
+}

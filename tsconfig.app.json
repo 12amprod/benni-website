@@ -1,0 +1,35 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"jsx": "react-jsx",
+		"types": ["vite/client"],
+		"skipLibCheck": true,
+		"noEmit": true,
+		"isolatedModules": true,
+		"moduleDetection": "force",
+		"allowImportingTsExtensions": true,
+		"resolveJsonModule": true,
+		"useDefineForClassFields": true,
+		"noUncheckedSideEffectImports": true,
+
+		// Deliberately NOT `verbatimModuleSyntax`: TanStack Start warns that it can leak
+		// server-only modules into the client bundle (a type import without `type` keeps
+		// the runtime import). Biome's `useImportType` enforces the same hygiene instead.
+
+		// Mirrors the `imports` field in package.json so `#/…` resolves identically
+		// for tsc, Vite and Node. Prefer it over deep relative paths.
+		"paths": { "#/*": ["./src/*"] },
+
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"exactOptionalPropertyTypes": true
+	},
+	"include": ["src"]
+}

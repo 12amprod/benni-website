@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+	/* Design tokens live here (Tailwind v4 is CSS-first, no tailwind.config). */
+	--font-sans: ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+	html {
+		color-scheme: light;
+		scroll-behavior: smooth;
+	}
+	body {
+		@apply min-h-dvh bg-white text-neutral-900 antialiased;
+	}
+}

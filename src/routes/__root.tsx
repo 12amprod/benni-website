@@ -32,6 +32,24 @@ export const Route = createRootRoute({
 		links: [
 			{ rel: "stylesheet", href: appCss },
 			{ rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+			// The display face sets the headline, the wordmark and the nav — everything
+			// above the fold. Without the preload the browser only discovers it after the
+			// stylesheet parses and the hero visibly swaps fonts. `crossorigin` is required
+			// on font preloads even same-origin, or the file is fetched twice.
+			{
+				rel: "preload",
+				as: "font",
+				type: "font/woff2",
+				href: "/fonts/texgyreadventor-regular.woff2",
+				crossOrigin: "anonymous",
+			},
+			{
+				rel: "preload",
+				as: "font",
+				type: "font/woff2",
+				href: "/fonts/texgyreadventor-bold.woff2",
+				crossOrigin: "anonymous",
+			},
 		],
 	}),
 	shellComponent: RootDocument,

@@ -11,8 +11,8 @@ export const Route = createFileRoute("/impressum")({
 function ImpressumPage() {
 	return (
 		<section className="mx-auto max-w-5xl px-6 py-24">
-			<h1 className="font-semibold text-3xl tracking-tight">Impressum</h1>
-			<p className="mt-6 max-w-prose text-neutral-600">
+			<h1 className="font-bold text-3xl">Impressum</h1>
+			<p className="mt-6 max-w-prose text-ink-muted">
 				Angaben gemäß § 5 DDG folgen. Platzhalter, bis die echten Kontaktdaten vorliegen.
 			</p>
 		</section>

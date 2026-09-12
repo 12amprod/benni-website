@@ -1,16 +1,102 @@
 @import "tailwindcss";
 
+/*
+ * The display face. Deftones' "White Pony" is set in ITC Avant Garde Gothic, which is a
+ * commercial licence and cannot ship with a site — TeX Gyre Adventor is the free end of a
+ * chain of legitimate clones of it and keeps the same shapes. Self-hosted on purpose; see
+ * `public/fonts/README.md` for provenance and the licence.
+ *
+ * `swap` because the headlines are the page: better the fallback for 100ms than nothing.
+ */
+@font-face {
+	font-family: "TeX Gyre Adventor";
+	src: url("/fonts/texgyreadventor-regular.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "TeX Gyre Adventor";
+	src: url("/fonts/texgyreadventor-bold.woff2") format("woff2");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
 @theme {
 	/* Design tokens live here (Tailwind v4 is CSS-first, no tailwind.config). */
-	--font-sans: ui-sans-serif, system-ui, sans-serif;
+
+	/*
+	 * Two faces, two jobs. `display` carries everything the visitor reads as a sign —
+	 * headlines, the wordmark, the navigation, buttons, labels. `sans` keeps running prose
+	 * legible: Avant Garde's huge x-height and circular forms are built for headlines and
+	 * get tiring in a paragraph. The fallbacks are the geometric sans-serifs closest to it.
+	 *
+	 * Adventor ships Regular and Bold only, so display type is `font-bold` or nothing —
+	 * there are no mid weights to reach for.
+	 */
+	--font-display:
+		"TeX Gyre Adventor", "Century Gothic", "URW Gothic", "Avant Garde", "Futura", ui-sans-serif,
+		sans-serif;
+
+	/* Apple's own stack: SF Pro on Apple platforms, the platform UI font elsewhere. */
+	--font-sans:
+		ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+		sans-serif;
+
+	/* RELAPSE happens at night and every photo is a night photo — the site is dark. */
+	--color-canvas: #000000;
+	--color-surface: #101012;
+	--color-elevated: #1d1d1f;
+	--color-ink: #f5f5f7;
+	--color-ink-muted: #a1a1a6;
+	--color-hairline: #29292d;
+
+	/* Accents sampled from the RELAPSE poster artwork (green chrome type, pink hearts). */
+	--color-relapse: #5ee34a;
+	--color-relapse-pink: #ff2d78;
+
+	/* The sticky header's height. Sections offset their scroll anchor by it. */
+	--spacing-header: 3rem;
 }
 
 @layer base {
 	html {
-		color-scheme: light;
+		color-scheme: dark;
 		scroll-behavior: smooth;
+		/* Without this an anchored section starts underneath the sticky header. */
+		scroll-padding-top: var(--spacing-header);
 	}
 	body {
-		@apply min-h-dvh bg-white text-neutral-900 antialiased;
+		@apply min-h-dvh bg-canvas text-ink antialiased;
+	}
+
+	/*
+	 * Every heading is display type, so it is set here once rather than repeated as a class
+	 * on each component. Anything else that should carry the face — nav, labels, buttons —
+	 * asks for it with `font-display` at the point of use.
+	 */
+	h1,
+	h2,
+	h3 {
+		font-family: var(--font-display);
+	}
+
+	/* The browser default ring is hard to see on black, so the brand green takes over. */
+	:focus-visible {
+		outline: 2px solid var(--color-relapse);
+		outline-offset: 3px;
+		border-radius: 2px;
+	}
+
+	/*
+	 * Smooth scrolling is the one thing here that moves the whole viewport, so it is the
+	 * one thing switched off globally. Everything else that travels rather than just
+	 * fading carries Tailwind's `motion-safe:` variant at the point of use.
+	 */
+	@media (prefers-reduced-motion: reduce) {
+		html {
+			scroll-behavior: auto;
+		}
 	}
 }

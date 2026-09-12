@@ -16,10 +16,10 @@ const instagram = {
 } as const;
 
 export const site = {
-	name: "RELAPSE",
-	title: "RELAPSE – Eventreihe & Fotoarchiv",
+	name: "relapse",
+	title: "relapse – Eventreihe & Fotoarchiv",
 	description:
-		"RELAPSE ist eine Eventreihe zwischen Techno und Rap in der Hafenbar Hettstedt. Termine, Lineup und das Fotoarchiv aller bisherigen Ausgaben.",
+		"relapse ist eine Eventreihe zwischen Techno und Rap in der Hafenbar Hettstedt. Termine, Lineup und das Fotoarchiv aller bisherigen Ausgaben.",
 	locale: "de",
 
 	/** TODO: Platzhalter, bis die echte Kontaktadresse feststeht. */
@@ -42,7 +42,7 @@ export const site = {
 	 * the section. The section ids are set in `src/routes/index.tsx`.
 	 */
 	nav: [
-		{ to: "/", hash: "vol4", label: "VOL.4" },
+		{ to: "/", hash: "vol4", label: "vol.4" },
 		{ to: "/", hash: "events", label: "Events" },
 		{ to: "/", hash: "lineup", label: "Lineup" },
 		{ to: "/", hash: "galerie", label: "Galerie" },
@@ -52,11 +52,13 @@ export const site = {
 	],
 
 	hero: {
-		title: "RELAPSE",
+		title: "relapse",
 		subtitle: "Techno, Rap und lange Nächte in der Hafenbar Hettstedt.",
+		/** Set small and flush right under the wordmark, like "white pony" under "deftones". */
+		edition: "vol.4",
 		image: "/images/relapse/beach-02.jpg",
 		imageAlt:
-			"Volle Tanzfläche unter Lichterketten bei RELAPSE BEACH, im grünen Scheinwerferlicht gehen Hände nach oben.",
+			"Volle Tanzfläche unter Lichterketten bei relapse beach, im grünen Scheinwerferlicht gehen Hände nach oben.",
 		links: [
 			{ label: "Events ansehen", hash: "events" },
 			{ label: "Ins Fotoarchiv", hash: "galerie" },
@@ -66,44 +68,44 @@ export const site = {
 	/** The next edition. TODO: Datum, Lineup und Ticketlink ergänzen, sobald angekündigt. */
 	next: {
 		eyebrow: "Die nächste Ausgabe",
-		title: "RELAPSE VOL.4",
+		title: "relapse vol.4",
 		subtitle: "Coming soon.",
 		body: "Datum, Lineup und Tickets werden zuerst auf Instagram angekündigt.",
 		image: "/images/relapse/vol3-07.jpg",
-		imageAlt: "Silhouette vor weißem Nebel und Lichtpunkten auf der Tanzfläche bei RELAPSE VOL.3.",
+		imageAlt: "Silhouette vor weißem Nebel und Lichtpunkten auf der Tanzfläche bei relapse vol.3.",
 		links: [
 			{ label: "Auf Instagram folgen", href: instagram.url },
 			{ label: "Alle Termine", hash: "termine" },
 		],
 	},
 
-	/** The two most recent editions, as the pair of tiles under the VOL.4 panel. */
+	/** The two most recent editions, as the pair of tiles under the vol.4 panel. */
 	featured: {
 		title: "Die letzten Ausgaben",
 		body: "Zweimal Hafenbar: einmal draußen im Hof, einmal drinnen im Club.",
 		items: [
 			{
-				title: "RELAPSE BEACH",
+				title: "relapse beach",
 				meta: "25.07.2026 · Hafenbar Hettstedt",
 				body: "Open Air zum 13. Geburtstag der Hafenbar: Beach Stage, Live-Rap und Lichterketten bis in den Morgen.",
 				image: "/images/relapse/beach-06.jpg",
 				imageAlt:
-					"Publikum bei RELAPSE BEACH hält Handytaschenlampen in die Luft, im Hintergrund Lichterketten.",
+					"Publikum bei relapse beach hält Handytaschenlampen in die Luft, im Hintergrund Lichterketten.",
 			},
 			{
-				title: "RELAPSE VOL.3",
+				title: "relapse vol.3",
 				meta: "Januar 2026 · Hafenbar Hettstedt",
 				body: "Die dritte Ausgabe drinnen: Nebel, Strobo und ein Lineup zwischen Hardtechno und Rap.",
 				image: "/images/relapse/vol3-08.jpg",
-				imageAlt: "Zwei DJs hinter den Decks bei RELAPSE VOL.3, auf der Leinwand steht 12AM.",
+				imageAlt: "Zwei DJs hinter den Decks bei relapse vol.3, auf der Leinwand steht 12AM.",
 			},
 		],
 	},
 
-	/** Acts that have played a RELAPSE so far, per the posts on the profile. */
+	/** Acts that have played a relapse so far, per the posts on the profile. */
 	lineup: {
 		title: "Das Lineup",
-		body: "Wer bisher bei RELAPSE gespielt hat — zwischen Hardtechno, Industrial und deutschem Rap.",
+		body: "Wer bisher bei relapse gespielt hat — zwischen Hardtechno, Industrial und deutschem Rap.",
 		artists: [
 			{
 				name: "yung.shattered",
@@ -111,7 +113,7 @@ export const site = {
 				handle: "@yung.shattered",
 				url: "https://www.instagram.com/yung.shattered/",
 				image: "/images/relapse/vol3-03.jpg",
-				imageAlt: "yung.shattered singt bei RELAPSE VOL.3 ins Mikrofon.",
+				imageAlt: "yung.shattered singt bei relapse vol.3 ins Mikrofon.",
 			},
 			{
 				name: "madebyanybody",
@@ -120,7 +122,7 @@ export const site = {
 				url: "https://www.instagram.com/madebyanybody/",
 				image: "/images/relapse/vol3-09.jpg",
 				imageAlt:
-					"madebyanybody am DJ-Pult bei RELAPSE VOL.3, der Name leuchtet auf der Leinwand dahinter.",
+					"madebyanybody am DJ-Pult bei relapse vol.3, der Name leuchtet auf der Leinwand dahinter.",
 			},
 			{
 				name: "DJ Sonnenschein",
@@ -129,16 +131,16 @@ export const site = {
 				url: "https://www.instagram.com/djsonnenschein/",
 				image: "/images/relapse/vol3-05.jpg",
 				imageAlt:
-					"DJ Sonnenschein legt bei RELAPSE VOL.3 auf, der Name läuft über die Leinwand im Hintergrund.",
+					"DJ Sonnenschein legt bei relapse vol.3 auf, der Name läuft über die Leinwand im Hintergrund.",
 			},
 		],
 	},
 
 	gallery: {
 		title: "Das Archiv",
-		body: "Fotos von RELAPSE BEACH und RELAPSE VOL.3.",
+		body: "Fotos von relapse beach und relapse vol.3.",
 		/** Credits are the photographers tagged on the original posts. */
-		credits: "Fotos: @jnsrbmn (VOL.3), @timflp.archive (BEACH), @madebyanybody",
+		credits: "Fotos: @jnsrbmn (vol.3), @timflp.archive (beach), @madebyanybody",
 		photos: [
 			{
 				src: "/images/relapse/beach-08.jpg",
@@ -147,12 +149,12 @@ export const site = {
 			},
 			{
 				src: "/images/relapse/beach-04.jpg",
-				alt: "Grelles weißes Bühnenlicht strahlt über die Menge bei RELAPSE BEACH.",
+				alt: "Grelles weißes Bühnenlicht strahlt über die Menge bei relapse beach.",
 				wide: false,
 			},
 			{
 				src: "/images/relapse/vol3-01.jpg",
-				alt: "Blick über das DJ-Pult bei RELAPSE VOL.3, ein Lichtstrahl bricht sich im Nebel über der Menge.",
+				alt: "Blick über das DJ-Pult bei relapse vol.3, ein Lichtstrahl bricht sich im Nebel über der Menge.",
 				wide: false,
 			},
 			{
@@ -162,7 +164,7 @@ export const site = {
 			},
 			{
 				src: "/images/relapse/vol3-06.jpg",
-				alt: "Violetter Nebel über der Tanzfläche bei RELAPSE VOL.3, im Hintergrund die Bühne.",
+				alt: "Violetter Nebel über der Tanzfläche bei relapse vol.3, im Hintergrund die Bühne.",
 				wide: false,
 			},
 			{
@@ -182,7 +184,7 @@ export const site = {
 			},
 			{
 				src: "/images/relapse/vol3-02.jpg",
-				alt: "Zwei Silhouetten im violetten Licht vor der Bühne bei RELAPSE VOL.3.",
+				alt: "Zwei Silhouetten im violetten Licht vor der Bühne bei relapse vol.3.",
 				wide: false,
 			},
 			{
@@ -197,40 +199,40 @@ export const site = {
 		title: "Termine",
 		body: "Alle Ausgaben in der Reihenfolge, in der sie stattgefunden haben.",
 		/**
-		 * TODO: Die Daten von VOL.1 und VOL.2 stehen nicht öffentlich auf dem Profil und
+		 * TODO: Die Daten von vol.1 und vol.2 stehen nicht öffentlich auf dem Profil und
 		 * sind bewusst offen gelassen, statt geraten zu werden.
 		 */
 		entries: [
 			{
-				title: "RELAPSE VOL.4",
+				title: "relapse vol.4",
 				dateLabel: "Datum folgt",
 				venue: "Hafenbar Hettstedt",
 				note: "Angekündigt",
 				upcoming: true,
 			},
 			{
-				title: "RELAPSE BEACH",
+				title: "relapse beach",
 				dateLabel: "25.07.2026",
 				venue: "Hafenbar Hettstedt",
 				note: "13 Jahre Hafenbar",
 				upcoming: false,
 			},
 			{
-				title: "RELAPSE VOL.3",
+				title: "relapse vol.3",
 				dateLabel: "Januar 2026",
 				venue: "Hafenbar Hettstedt",
 				note: "Fotos im Archiv",
 				upcoming: false,
 			},
 			{
-				title: "RELAPSE VOL.2",
+				title: "relapse vol.2",
 				dateLabel: "Datum wird ergänzt",
 				venue: "Hafenbar Hettstedt",
 				note: "Archiv",
 				upcoming: false,
 			},
 			{
-				title: "RELAPSE VOL.1",
+				title: "relapse vol.1",
 				dateLabel: "Datum wird ergänzt",
 				venue: "Hafenbar Hettstedt",
 				note: "Archiv",
@@ -244,7 +246,7 @@ export const site = {
 		eyebrow: "Location",
 		title: "Hafenbar Hettstedt",
 		subtitle: "Ein Ort, alle Ausgaben.",
-		body: "Jede bisherige Ausgabe von RELAPSE lief in der Hafenbar — drinnen im Club und draußen auf dem Hof mit der Beach Stage.",
+		body: "Jede bisherige Ausgabe von relapse lief in der Hafenbar — drinnen im Club und draußen auf dem Hof mit der Beach Stage.",
 		handle: "@hafenbar_hettstedt",
 		url: "https://www.instagram.com/hafenbar_hettstedt/",
 		image: "/images/relapse/beach-01.jpg",
@@ -265,7 +267,7 @@ export const site = {
 			{
 				title: "Events",
 				links: [
-					{ label: "RELAPSE VOL.4", hash: "vol4" },
+					{ label: "relapse vol.4", hash: "vol4" },
 					{ label: "Alle Termine", hash: "termine" },
 					{ label: "Location", hash: "location" },
 				],

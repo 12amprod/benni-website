@@ -22,8 +22,8 @@ export const Route = createFileRoute("/")({
 function HomePage() {
 	return (
 		<>
-			<ShowcasePanel lead {...site.hero} />
-			<ShowcasePanel id="vol4" {...site.next} />
+			<ShowcasePanel lead brand {...site.hero} />
+			<ShowcasePanel id="vol4" brand {...site.next} />
 			<FeaturedTiles />
 			<LineupGrid />
 			<GalleryGrid />

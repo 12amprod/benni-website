@@ -56,6 +56,12 @@
 	--color-relapse: #5ee34a;
 	--color-relapse-pink: #ff2d78;
 
+	/*
+	 * The brand lockup is set as tight as the "deftones" on the White Pony sleeve, where
+	 * the letters almost touch. Only for display sizes — below ~30px it closes up.
+	 */
+	--tracking-brand: -0.04em;
+
 	/* The sticky header's height. Sections offset their scroll anchor by it. */
 	--spacing-header: 3rem;
 }

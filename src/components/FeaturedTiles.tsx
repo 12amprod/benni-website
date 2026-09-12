@@ -31,7 +31,7 @@ export function FeaturedTiles() {
 						/>
 						<div className="-z-10 absolute inset-0 bg-gradient-to-b from-canvas/80 via-canvas/25 to-canvas/75" />
 
-						<h3 className="font-bold text-3xl sm:text-4xl">{item.title}</h3>
+						<h3 className="font-normal text-3xl tracking-brand sm:text-4xl">{item.title}</h3>
 						<p className="mt-2 font-display font-bold text-relapse text-sm">{item.meta}</p>
 						<p className="mx-auto mt-4 max-w-sm text-ink-muted text-sm">{item.body}</p>
 					</article>

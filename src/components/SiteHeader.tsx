@@ -30,7 +30,7 @@ export function SiteHeader() {
 					<Link
 						to="/"
 						onClick={() => setMenuOpen(false)}
-						className="font-display font-bold text-sm tracking-[0.3em] transition-opacity hover:opacity-70"
+						className="font-display text-base tracking-brand transition-opacity hover:opacity-70"
 					>
 						{site.name}
 					</Link>

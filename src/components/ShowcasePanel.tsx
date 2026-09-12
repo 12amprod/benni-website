@@ -4,6 +4,8 @@ type ShowcasePanelProps = {
 	id?: string;
 	eyebrow?: string;
 	title: string;
+	/** Set small and flush right under the title, the way "white pony" sits under "deftones". */
+	edition?: string;
 	subtitle: string;
 	body?: string;
 	links?: readonly PanelLinkTarget[];
@@ -14,6 +16,12 @@ type ShowcasePanelProps = {
 	 * the largest thing above the fold, so it loads eagerly while every other one waits.
 	 */
 	lead?: boolean;
+	/**
+	 * The title is the brand itself, so it is set the way the wordmark is — lowercase,
+	 * regular weight, tightly tracked. Headings that only name a section stay bold, which
+	 * is what keeps the two kinds of type apart.
+	 */
+	brand?: boolean;
 };
 
 /**
@@ -24,13 +32,17 @@ export function ShowcasePanel({
 	id,
 	eyebrow,
 	title,
+	edition,
 	subtitle,
 	body,
 	links,
 	image,
 	imageAlt,
 	lead = false,
+	brand = false,
 }: ShowcasePanelProps) {
+	const titleWeight = brand ? "font-normal tracking-brand" : "font-bold";
+
 	return (
 		<section
 			id={id}
@@ -55,11 +67,19 @@ export function ShowcasePanel({
 				{eyebrow ? (
 					<p className="font-display font-bold text-relapse text-sm tracking-wide">{eyebrow}</p>
 				) : null}
-				{lead ? (
-					<h1 className="mt-3 font-bold text-6xl sm:text-8xl">{title}</h1>
-				) : (
-					<h2 className="mt-3 font-bold text-4xl sm:text-6xl">{title}</h2>
-				)}
+
+				{/* `w-fit` shrinks the block to the word, so `edition` can sit flush with its right edge. */}
+				<div className="mx-auto mt-3 w-fit">
+					{lead ? (
+						<h1 className={`text-6xl sm:text-8xl ${titleWeight}`}>{title}</h1>
+					) : (
+						<h2 className={`text-4xl sm:text-6xl ${titleWeight}`}>{title}</h2>
+					)}
+					{edition ? (
+						<p className="-mt-1 text-right font-display text-xl sm:text-2xl">{edition}</p>
+					) : null}
+				</div>
+
 				<p className="mt-4 text-xl tracking-tight sm:text-2xl">{subtitle}</p>
 				{body ? <p className="mt-3 text-base text-ink-muted">{body}</p> : null}
 				{links?.length ? (

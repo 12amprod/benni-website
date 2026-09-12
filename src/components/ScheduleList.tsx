@@ -29,7 +29,7 @@ export function ScheduleList() {
 								{entry.dateLabel}
 							</p>
 							<div className="min-w-0 flex-1">
-								<h3 className="font-bold text-xl">{entry.title}</h3>
+								<h3 className="font-normal text-xl">{entry.title}</h3>
 								<p className="mt-1 font-display text-ink-muted text-sm">
 									{entry.venue} · {entry.note}
 								</p>

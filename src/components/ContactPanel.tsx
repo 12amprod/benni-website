@@ -6,7 +6,7 @@ export function ContactPanel() {
 
 	return (
 		<section id="kontakt" className="bg-surface px-5 py-20 sm:px-6 sm:py-28">
-			<div className="mx-auto max-w-2xl text-center">
+			<div className="reveal mx-auto max-w-2xl text-center">
 				<p className="font-display font-bold text-relapse text-sm tracking-wide">{eyebrow}</p>
 				<h2 className="mt-3 font-bold text-4xl sm:text-5xl">{title}</h2>
 				<p className="mt-4 text-ink-muted">{body}</p>

@@ -46,7 +46,7 @@ export function ShowcasePanel({
 	return (
 		<section
 			id={id}
-			className={`relative isolate flex items-center justify-center overflow-hidden ${
+			className={`relative isolate flex items-center justify-center overflow-clip ${
 				lead ? "min-h-svh py-24" : "py-28 sm:py-40"
 			}`}
 		>
@@ -58,7 +58,7 @@ export function ShowcasePanel({
 				loading={lead ? "eager" : "lazy"}
 				decoding="async"
 				fetchPriority={lead ? "high" : "auto"}
-				className="-z-10 absolute inset-0 size-full object-cover"
+				className="-z-10 absolute inset-0 size-full scroll-zoom object-cover"
 			/>
 			{/* Night photos are dark but not evenly dark — the scrim is what makes the type legible. */}
 			<div className="-z-10 absolute inset-0 bg-gradient-to-b from-canvas/80 via-canvas/45 to-canvas" />

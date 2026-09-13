@@ -9,7 +9,7 @@ export function FeaturedTiles() {
 
 	return (
 		<section id="events" className="bg-canvas px-2 pb-2">
-			<div className="mx-auto max-w-6xl px-3 pt-20 pb-10 text-center sm:pt-28">
+			<div className="reveal mx-auto max-w-6xl px-3 pt-20 pb-10 text-center sm:pt-28">
 				<h2 className="font-bold text-4xl sm:text-5xl">{title}</h2>
 				<p className="mx-auto mt-3 max-w-xl text-ink-muted">{body}</p>
 			</div>
@@ -18,7 +18,7 @@ export function FeaturedTiles() {
 				{items.map((item) => (
 					<article
 						key={item.title}
-						className="relative isolate flex min-h-96 flex-col items-center overflow-hidden rounded-3xl px-6 pt-12 pb-12 text-center sm:min-h-128"
+						className="reveal relative isolate flex min-h-96 flex-col items-center overflow-clip rounded-3xl px-6 pt-12 pb-12 text-center sm:min-h-128"
 					>
 						<img
 							src={item.image}

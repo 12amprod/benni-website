@@ -10,14 +10,14 @@ export function GalleryGrid() {
 	return (
 		<section id="galerie" className="bg-surface px-5 py-20 sm:px-6 sm:py-28">
 			<div className="mx-auto max-w-6xl">
-				<div className="text-center">
+				<div className="reveal text-center">
 					<h2 className="font-bold text-4xl sm:text-5xl">{title}</h2>
 					<p className="mx-auto mt-3 max-w-xl text-ink-muted">{body}</p>
 				</div>
 
 				<ul className="mt-12 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3">
 					{photos.map((photo) => (
-						<li key={photo.src} className={photo.wide ? "col-span-2" : undefined}>
+						<li key={photo.src} className={photo.wide ? "reveal col-span-2" : "reveal"}>
 							<img
 								src={photo.src}
 								alt={photo.alt}

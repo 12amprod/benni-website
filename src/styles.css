@@ -97,12 +97,78 @@
 
 	/*
 	 * Smooth scrolling is the one thing here that moves the whole viewport, so it is the
-	 * one thing switched off globally. Everything else that travels rather than just
-	 * fading carries Tailwind's `motion-safe:` variant at the point of use.
+	 * one thing switched off globally. The scroll-driven animations below are switched off
+	 * with it; everything else that travels rather than just fading carries Tailwind's
+	 * `motion-safe:` variant at the point of use.
 	 */
 	@media (prefers-reduced-motion: reduce) {
 		html {
 			scroll-behavior: auto;
 		}
+	}
+}
+
+/*
+ * Scroll-driven animation.
+ *
+ * These run on CSS scroll timelines: no animation library, no IntersectionObserver,
+ * no JavaScript at all — which is what keeps every page a static file that cannot
+ * fail to initialise. Two fallbacks are built in and neither needs a feature test:
+ *
+ * - A browser without `animation-timeline` drops that one declaration and is left
+ *   with a zero-duration animation in `both` fill mode, which renders the element
+ *   in its finished state. Nothing hides, nothing flashes.
+ * - Under `prefers-reduced-motion: reduce` the animation is never attached in the first
+ *   place, so the element keeps its natural opacity and scale. Gating has to happen here
+ *   rather than in @layer base: `@utility` emits into the `utilities` layer, which
+ *   outranks base, so an override there is silently ignored.
+ *
+ * One trap worth naming: `view()` measures against the nearest ancestor *scroll
+ * container*, and `overflow: hidden` creates one. Panels that clip a scaled photo
+ * therefore use `overflow-clip`, which clips without becoming a scroll container.
+ */
+@keyframes rise-in {
+	from {
+		opacity: 0;
+		transform: translateY(1.75rem);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes slow-zoom {
+	from {
+		transform: scale(1);
+	}
+	to {
+		transform: scale(1.08);
+	}
+}
+
+/* Fades and lifts into place as it enters the viewport. */
+@utility reveal {
+	@media (prefers-reduced-motion: no-preference) {
+		animation: rise-in linear both;
+		animation-timeline: view();
+		animation-range: entry 0% entry 65%;
+	}
+}
+
+/*
+ * A full-bleed photograph that drifts closer as its panel leaves.
+ *
+ * The range starts at `entry 100%` — the moment the panel is fully in view — rather
+ * than at `cover 0%`. For the hero, which already fills the viewport at scroll 0,
+ * `cover` would be half elapsed before the visitor has scrolled at all, so the photo
+ * would open already enlarged and never be seen at its native size. The photos are
+ * 1280px wide and full-bleed; every percent of upscale costs sharpness.
+ */
+@utility scroll-zoom {
+	@media (prefers-reduced-motion: no-preference) {
+		animation: slow-zoom linear both;
+		animation-timeline: view();
+		animation-range: entry 100% exit 100%;
 	}
 }

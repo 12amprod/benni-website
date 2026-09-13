@@ -112,47 +112,145 @@
 }
 
 /*
- * Scroll motion.
+ * Motion.
  *
- * The state here is set by `src/lib/scroll-motion.ts`; these are only the two
- * appearances it switches between. An earlier pass drove all of this from CSS
- * scroll timelines (`animation-timeline: view()`) — it measured correctly in
- * Chromium and did nothing at all in the browser it was built for, which is why
- * the work now sits on IntersectionObserver instead.
+ * State comes from `src/lib/scroll-motion.ts`; this file is only the two
+ * appearances it switches between, plus the entrance that runs on load.
  *
- * Reduced motion is tiered rather than switched off. Removing every animation
- * is an over-correction: elements then teleport, which is its own kind of
- * disorienting, and the previous attempt gated *everything* behind
- * `no-preference`, so anyone with the OS "Reduce motion" switch on saw a
- * completely static page. Here the travel and the scaling go; the fade stays
- * and shortens.
+ * History worth keeping, because both mistakes are easy to repeat. The first
+ * pass used CSS scroll timelines (`animation-timeline: view()`), which measured
+ * correctly in Chromium and did nothing in the browser it was built for — a
+ * silent failure, since its fallback is "content simply appears". The second
+ * pass worked but was far too timid to notice. These values are deliberately
+ * large: 2.5rem of travel, a 900ms curve, and a stagger between siblings, which
+ * is what makes a reveal read as intentional rather than as a repaint.
+ *
+ * Reduced motion stays tiered rather than switched off: the travel, the scaling
+ * and the ticker go; a short cross-fade remains, so the page still reads as
+ * composed instead of dead.
  */
 @layer components {
+	/* --- Reveals on scroll ------------------------------------------------- */
 	.reveal {
 		transition:
-			opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
-			transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+			opacity 900ms cubic-bezier(0.16, 1, 0.3, 1),
+			transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+		transition-delay: var(--reveal-delay, 0ms);
 	}
 	.reveal[data-reveal="pending"] {
 		opacity: 0;
-		transform: translateY(1.75rem);
+		transform: translateY(2.5rem) scale(0.97);
 	}
 
+	/* --- The hero, on load ------------------------------------------------- */
+	/* The wordmark wipes up from behind its own edge; everything under it
+	   follows in sequence. Pure CSS, so it plays whether or not the bundle
+	   has booted. */
+	.mask-line {
+		display: block;
+		overflow: clip;
+		/* The inner span must be a block too: transforms are ignored on inline
+		   boxes, so as an inline element it would sit there perfectly still. */
+		/* The clip would otherwise cut the descender off "relapse"; the negative
+		   margin gives the room back so layout is unchanged. */
+		padding-block-end: 0.14em;
+		margin-block-end: -0.14em;
+	}
+	.mask-line > span {
+		display: block;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hero-enter .mask-line > span {
+			animation: mask-up 1200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+		}
+		.hero-enter .hero-edition,
+		.hero-enter > :nth-child(2),
+		.hero-enter > :nth-child(3) {
+			animation: rise-up 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+		}
+		.hero-enter .hero-edition {
+			animation-delay: 260ms;
+		}
+		.hero-enter > :nth-child(2) {
+			animation-delay: 420ms;
+		}
+		.hero-enter > :nth-child(3) {
+			animation-delay: 560ms;
+		}
+	}
+
+	/* --- Photographs that travel --------------------------------------------- */
 	.scroll-zoom {
-		transform: scale(var(--zoom, 1));
+		transform: scale(var(--zoom, 1)) translateY(var(--shift, 0px));
+	}
+
+	/* --- The hero falling away as the page moves ---------------------------- */
+	.hero-exit {
+		opacity: var(--exit-fade, 1);
+		transform: translateY(var(--exit-rise, 0px));
+	}
+
+	/* --- Ticker -------------------------------------------------------------- */
+	.ticker-track {
+		display: flex;
+		width: max-content;
+		animation: ticker 42s linear infinite;
+	}
+	/* WCAG 2.2.2 wants a way to stop motion that runs longer than five seconds. */
+	.ticker:hover .ticker-track,
+	.ticker:focus-within .ticker-track {
+		animation-play-state: paused;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
 		/* Tier 2 — the displacement goes, a short cross-fade remains. */
 		.reveal {
-			transition: opacity 200ms ease;
+			transition: opacity 220ms ease;
+			transition-delay: var(--reveal-delay, 0ms);
 		}
 		.reveal[data-reveal="pending"] {
 			transform: none;
 		}
-		/* Tier 1 — a large photograph scaling under the reader is removed. */
-		.scroll-zoom {
+		/* Tier 1 — large travelling surfaces and endless motion are removed. */
+		.scroll-zoom,
+		.hero-exit {
 			transform: none;
 		}
+		.hero-exit {
+			opacity: 1;
+		}
+		.ticker-track {
+			animation: none;
+		}
+	}
+}
+
+@keyframes mask-up {
+	from {
+		transform: translateY(115%);
+	}
+	to {
+		transform: none;
+	}
+}
+
+@keyframes rise-up {
+	from {
+		opacity: 0;
+		transform: translateY(1.5rem);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes ticker {
+	from {
+		transform: translateX(0);
+	}
+	to {
+		transform: translateX(-50%);
 	}
 }

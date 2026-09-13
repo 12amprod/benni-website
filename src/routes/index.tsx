@@ -5,6 +5,7 @@ import { GalleryGrid } from "#/components/GalleryGrid";
 import { LineupGrid } from "#/components/LineupGrid";
 import { ScheduleList } from "#/components/ScheduleList";
 import { ShowcasePanel } from "#/components/ShowcasePanel";
+import { Ticker } from "#/components/Ticker";
 import { site } from "#/content/site";
 
 export const Route = createFileRoute("/")({
@@ -24,6 +25,7 @@ function HomePage() {
 		<>
 			<ShowcasePanel lead brand {...site.hero} />
 			<ShowcasePanel id="vol4" brand {...site.next} />
+			<Ticker />
 			<FeaturedTiles />
 			<LineupGrid />
 			<GalleryGrid />

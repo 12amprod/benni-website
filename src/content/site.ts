@@ -51,6 +51,9 @@ export const site = {
 		{ to: "/", hash: "kontakt", label: "Kontakt" },
 	],
 
+	/** The words that loop through the ticker strip. Repeated as-is, so keep them short. */
+	ticker: ["relapse vol.4", "datum folgt", "hafenbar hettstedt", "techno & rap", "@relapse.vol4"],
+
 	hero: {
 		title: "relapse",
 		subtitle: "Techno, Rap und lange Nächte in der Hafenbar Hettstedt.",

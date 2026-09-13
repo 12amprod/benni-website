@@ -1,27 +1,29 @@
 /**
- * Scroll motion for the home page: section reveals, a slow push-in on the
- * full-bleed photographs, and the header background that appears once the page
- * has moved.
+ * Scroll motion for the site: staggered section reveals, photographs that
+ * travel as their panel passes, the hero falling away, and the header
+ * background that appears once the page has moved.
  *
- * Why not CSS scroll timelines: the first attempt used `animation-timeline:
- * view()`. It measured correctly in Chromium and did nothing whatsoever in the
- * browser it was meant for. The API is too new to carry a whole page, and its
- * failure mode is silent — the content simply appears, so a broken animation
- * looks exactly like no animation. IntersectionObserver has shipped everywhere
- * since 2019 and cannot quietly no-op.
+ * Two earlier attempts are worth remembering. The first drove everything from
+ * CSS scroll timelines (`animation-timeline: view()`); it measured correctly in
+ * Chromium and did nothing in the browser it was for, and because its fallback
+ * is "content simply appears", a dead animation looked exactly like no
+ * animation. IntersectionObserver has shipped everywhere since 2019 and cannot
+ * quietly no-op. The second worked but was pitched so low nobody noticed it —
+ * hence the stagger below, which is what separates a reveal that reads as
+ * deliberate from one that reads as a repaint.
  *
- * Why not GSAP: reveals and a scale are not what a 110 KB scroll library is for
- * (pinning, scrubbed timelines, SplitText, Flip). This file is the whole motion
- * layer and it costs nothing to download.
- *
- * Nothing here hides anything on its own. Only elements that are below the fold
- * *at the moment this runs* are armed, so there is never a frame where visible
- * content blinks out — and with JavaScript off, or if the bundle never arrives,
- * the page is just the static page, complete and readable.
+ * Nothing here hides anything on its own: only elements that are below the fold
+ * at the moment this runs are armed. With JavaScript off, or if the bundle never
+ * arrives, the page is the static page, complete and readable.
  */
 
 /** How far a photograph is allowed to drift closer, as a scale factor. */
-const ZOOM = 0.08;
+const ZOOM = 0.18;
+/** How far a photograph slides against the scroll, in pixels at each extreme. */
+const SHIFT = 42;
+/** Gap between neighbouring reveals, and the point at which it stops growing. */
+const STAGGER_MS = 90;
+const STAGGER_MAX = 6;
 
 export function initScrollMotion(): () => void {
 	const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -30,11 +32,24 @@ export function initScrollMotion(): () => void {
 	// --- Section reveals ---------------------------------------------------
 	// Kept under reduced motion, where the CSS drops the travel and shortens the
 	// fade: an element that teleports into place is worse than one that fades.
-	const candidates = [...document.querySelectorAll<HTMLElement>(".reveal")];
-	const armed = candidates.filter(
-		(el) => el.getBoundingClientRect().top > window.innerHeight * 0.9,
+	const armed = [...document.querySelectorAll<HTMLElement>(".reveal")].filter(
+		(el) => el.getBoundingClientRect().top > window.innerHeight * 0.85,
 	);
-	for (const el of armed) el.dataset.reveal = "pending";
+
+	// Siblings arrive one after another rather than as a block. Grouping by
+	// parent means a grid of ten photographs ripples, while a lone heading is
+	// not needlessly delayed.
+	const seen = new Map<Element, number>();
+	for (const el of armed) {
+		const parent = el.parentElement;
+		if (!parent) continue;
+		const index = seen.get(parent) ?? 0;
+		seen.set(parent, index + 1);
+		if (index > 0) {
+			el.style.setProperty("--reveal-delay", `${Math.min(index, STAGGER_MAX) * STAGGER_MS}ms`);
+		}
+		el.dataset.reveal = "pending";
+	}
 
 	if (armed.length > 0) {
 		const observer = new IntersectionObserver(
@@ -45,17 +60,18 @@ export function initScrollMotion(): () => void {
 					observer.unobserve(entry.target);
 				}
 			},
-			{ rootMargin: "0px 0px -8% 0px", threshold: 0.05 },
+			{ rootMargin: "0px 0px -10% 0px", threshold: 0.05 },
 		);
 		for (const el of armed) observer.observe(el);
 		cleanups.push(() => observer.disconnect());
 	}
 
-	// --- Header background + photograph drift ------------------------------
-	// The header switch is a colour change, which is safe for everyone. The
-	// drift is a large element scaling under the reader — a vestibular trigger —
-	// so it is not wired up at all when reduced motion is asked for.
+	// --- Per-frame work ----------------------------------------------------
+	// The header switch is a colour change and safe for everyone. The travelling
+	// photographs and the falling hero are large moving surfaces — vestibular
+	// triggers — so they are not wired up at all when reduced motion is asked for.
 	const panels = reduced ? [] : [...document.querySelectorAll<HTMLElement>(".scroll-zoom")];
+	const heroes = reduced ? [] : [...document.querySelectorAll<HTMLElement>(".hero-exit")];
 	const root = document.documentElement;
 	let frame = 0;
 
@@ -64,12 +80,23 @@ export function initScrollMotion(): () => void {
 		root.toggleAttribute("data-scrolled", window.scrollY > 8);
 
 		const viewport = window.innerHeight;
+
 		for (const el of panels) {
 			const rect = el.getBoundingClientRect();
 			if (rect.bottom < 0 || rect.top > viewport) continue;
 			// 0 while the panel rests in view, 1 once it has fully travelled past.
-			const progress = Math.min(1, Math.max(0, -rect.top / Math.max(rect.height, 1)));
-			el.style.setProperty("--zoom", String(1 + progress * ZOOM));
+			const passed = Math.min(1, Math.max(0, -rect.top / Math.max(rect.height, 1)));
+			// -1 above the fold through +1 below it, for the counter-scroll slide.
+			const centred = (rect.top + rect.height / 2 - viewport / 2) / viewport;
+			el.style.setProperty("--zoom", String(1 + passed * ZOOM));
+			el.style.setProperty("--shift", `${Math.max(-1, Math.min(1, centred)) * SHIFT}px`);
+		}
+
+		for (const el of heroes) {
+			const rect = el.getBoundingClientRect();
+			const progress = Math.min(1, Math.max(0, -rect.top / (viewport * 0.7)));
+			el.style.setProperty("--exit-fade", String(1 - progress));
+			el.style.setProperty("--exit-rise", `${progress * -80}px`);
 		}
 	};
 

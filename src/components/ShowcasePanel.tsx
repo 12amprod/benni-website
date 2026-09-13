@@ -63,7 +63,11 @@ export function ShowcasePanel({
 			{/* Night photos are dark but not evenly dark — the scrim is what makes the type legible. */}
 			<div className="-z-10 absolute inset-0 bg-gradient-to-b from-canvas/80 via-canvas/45 to-canvas" />
 
-			<div className="mx-auto max-w-3xl px-5 text-center sm:px-6">
+			<div
+				className={`mx-auto max-w-3xl px-5 text-center sm:px-6 ${
+					lead ? "hero-enter hero-exit" : ""
+				}`}
+			>
 				{eyebrow ? (
 					<p className="font-display font-bold text-relapse text-sm tracking-wide">{eyebrow}</p>
 				) : null}
@@ -71,12 +75,20 @@ export function ShowcasePanel({
 				{/* `w-fit` shrinks the block to the word, so `edition` can sit flush with its right edge. */}
 				<div className="mx-auto mt-3 w-fit">
 					{lead ? (
-						<h1 className={`text-6xl sm:text-8xl ${titleWeight}`}>{title}</h1>
+						// The inner span is what slides; the wrapper clips it, so the wordmark
+						// wipes up from behind its own edge instead of merely fading in.
+						<h1 className={`text-6xl sm:text-8xl ${titleWeight}`}>
+							<span className="mask-line">
+								<span>{title}</span>
+							</span>
+						</h1>
 					) : (
 						<h2 className={`text-4xl sm:text-6xl ${titleWeight}`}>{title}</h2>
 					)}
 					{edition ? (
-						<p className="-mt-1 text-right font-display text-xl sm:text-2xl">{edition}</p>
+						<p className="hero-edition -mt-1 text-right font-display text-xl sm:text-2xl">
+							{edition}
+						</p>
 					) : null}
 				</div>
 

@@ -22,7 +22,7 @@ export function SiteHeader() {
 
 	return (
 		<header className="sticky top-0 z-50">
-			<div className="border-hairline/80 border-b bg-canvas/70 backdrop-blur-2xl backdrop-saturate-150">
+			<div className="border-transparent border-b transition-colors duration-300 scrolled:border-hairline/80 scrolled:bg-canvas/70 scrolled:backdrop-blur-2xl scrolled:backdrop-saturate-150">
 				<nav
 					aria-label="Hauptnavigation"
 					className="mx-auto flex h-header max-w-6xl items-center gap-6 px-5 sm:px-6"

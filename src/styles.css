@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Set on <html> by the motion layer as soon as the page is scrolled past the top. */
+@custom-variant scrolled ([data-scrolled] &);
+
 /*
  * The display face. Deftones' "White Pony" is set in ITC Avant Garde Gothic, which is a
  * commercial licence and cannot ship with a site — TeX Gyre Adventor is the free end of a
@@ -109,66 +112,47 @@
 }
 
 /*
- * Scroll-driven animation.
+ * Scroll motion.
  *
- * These run on CSS scroll timelines: no animation library, no IntersectionObserver,
- * no JavaScript at all — which is what keeps every page a static file that cannot
- * fail to initialise. Two fallbacks are built in and neither needs a feature test:
+ * The state here is set by `src/lib/scroll-motion.ts`; these are only the two
+ * appearances it switches between. An earlier pass drove all of this from CSS
+ * scroll timelines (`animation-timeline: view()`) — it measured correctly in
+ * Chromium and did nothing at all in the browser it was built for, which is why
+ * the work now sits on IntersectionObserver instead.
  *
- * - A browser without `animation-timeline` drops that one declaration and is left
- *   with a zero-duration animation in `both` fill mode, which renders the element
- *   in its finished state. Nothing hides, nothing flashes.
- * - Under `prefers-reduced-motion: reduce` the animation is never attached in the first
- *   place, so the element keeps its natural opacity and scale. Gating has to happen here
- *   rather than in @layer base: `@utility` emits into the `utilities` layer, which
- *   outranks base, so an override there is silently ignored.
- *
- * One trap worth naming: `view()` measures against the nearest ancestor *scroll
- * container*, and `overflow: hidden` creates one. Panels that clip a scaled photo
- * therefore use `overflow-clip`, which clips without becoming a scroll container.
+ * Reduced motion is tiered rather than switched off. Removing every animation
+ * is an over-correction: elements then teleport, which is its own kind of
+ * disorienting, and the previous attempt gated *everything* behind
+ * `no-preference`, so anyone with the OS "Reduce motion" switch on saw a
+ * completely static page. Here the travel and the scaling go; the fade stays
+ * and shortens.
  */
-@keyframes rise-in {
-	from {
+@layer components {
+	.reveal {
+		transition:
+			opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
+			transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.reveal[data-reveal="pending"] {
 		opacity: 0;
 		transform: translateY(1.75rem);
 	}
-	to {
-		opacity: 1;
-		transform: none;
-	}
-}
 
-@keyframes slow-zoom {
-	from {
-		transform: scale(1);
+	.scroll-zoom {
+		transform: scale(var(--zoom, 1));
 	}
-	to {
-		transform: scale(1.08);
-	}
-}
 
-/* Fades and lifts into place as it enters the viewport. */
-@utility reveal {
-	@media (prefers-reduced-motion: no-preference) {
-		animation: rise-in linear both;
-		animation-timeline: view();
-		animation-range: entry 0% entry 65%;
-	}
-}
-
-/*
- * A full-bleed photograph that drifts closer as its panel leaves.
- *
- * The range starts at `entry 100%` — the moment the panel is fully in view — rather
- * than at `cover 0%`. For the hero, which already fills the viewport at scroll 0,
- * `cover` would be half elapsed before the visitor has scrolled at all, so the photo
- * would open already enlarged and never be seen at its native size. The photos are
- * 1280px wide and full-bleed; every percent of upscale costs sharpness.
- */
-@utility scroll-zoom {
-	@media (prefers-reduced-motion: no-preference) {
-		animation: slow-zoom linear both;
-		animation-timeline: view();
-		animation-range: entry 100% exit 100%;
+	@media (prefers-reduced-motion: reduce) {
+		/* Tier 2 — the displacement goes, a short cross-fade remains. */
+		.reveal {
+			transition: opacity 200ms ease;
+		}
+		.reveal[data-reveal="pending"] {
+			transform: none;
+		}
+		/* Tier 1 — a large photograph scaling under the reader is removed. */
+		.scroll-zoom {
+			transform: none;
+		}
 	}
 }

@@ -1,10 +1,11 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { NotFound } from "#/components/NotFound";
 import { SiteFooter } from "#/components/SiteFooter";
 import { SiteHeader } from "#/components/SiteHeader";
 import { site } from "#/content/site";
+import { initScrollMotion } from "#/lib/scroll-motion";
 import appCss from "#/styles.css?url";
 
 export const Route = createRootRoute({
@@ -74,6 +75,10 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 }
 
 function RootLayout() {
+	// The motion layer reads the DOM the prerender produced, so it is set up once
+	// here rather than per component. It returns its own teardown.
+	useEffect(() => initScrollMotion(), []);
+
 	return (
 		<>
 			<SiteHeader />

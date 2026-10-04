@@ -1,6 +1,7 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { type ReactNode, useEffect } from "react";
+import { MetaLine } from "#/components/MetaLine";
 import { NotFound } from "#/components/NotFound";
 import { SiteFooter } from "#/components/SiteFooter";
 import { SiteHeader } from "#/components/SiteHeader";
@@ -51,6 +52,16 @@ export const Route = createRootRoute({
 				href: "/fonts/texgyreadventor-bold.woff2",
 				crossOrigin: "anonymous",
 			},
+			// The mono face sets the metadata line, which is on screen from the first
+			// frame at the bottom edge, so it is discovered with the display faces
+			// rather than one stylesheet later.
+			{
+				rel: "preload",
+				as: "font",
+				type: "font/woff2",
+				href: "/fonts/jetbrainsmono-regular.woff2",
+				crossOrigin: "anonymous",
+			},
 		],
 	}),
 	shellComponent: RootDocument,
@@ -86,6 +97,7 @@ function RootLayout() {
 				<Outlet />
 			</main>
 			<SiteFooter />
+			<MetaLine />
 			<TanStackRouterDevtools position="bottom-right" />
 		</>
 	);

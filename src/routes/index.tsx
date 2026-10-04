@@ -1,11 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ArchiveSection } from "#/components/ArchiveSection";
 import { ContactPanel } from "#/components/ContactPanel";
-import { FeaturedTiles } from "#/components/FeaturedTiles";
-import { GalleryGrid } from "#/components/GalleryGrid";
-import { LineupGrid } from "#/components/LineupGrid";
-import { ScheduleList } from "#/components/ScheduleList";
+import { EditionsSection } from "#/components/EditionsSection";
 import { ShowcasePanel } from "#/components/ShowcasePanel";
-import { Ticker } from "#/components/Ticker";
 import { site } from "#/content/site";
 
 export const Route = createFileRoute("/")({
@@ -16,20 +13,20 @@ export const Route = createFileRoute("/")({
 });
 
 /**
- * Apple stacks one full-bleed panel per thing it wants you to see, then a tile row, then
- * the detail sections. Same order here: the series, the next edition, the last two, who
- * played, the archive, the dates, the place, how to reach them.
+ * Six plates, not eight: the wordmark, the next edition, every edition, the archive, the
+ * room it happens in, and how to reach anyone. Each one is a single subject, and the
+ * visitor arrives at the bottom having been asked to read four headings rather than eight.
+ *
+ * The full-bleed photographic panels and the ruled sections alternate on purpose — a page
+ * of nothing but pictures has no rhythm, and neither does a page of nothing but rules.
  */
 function HomePage() {
 	return (
 		<>
-			<ShowcasePanel lead brand {...site.hero} />
-			<ShowcasePanel id="vol4" brand {...site.next} />
-			<Ticker />
-			<FeaturedTiles />
-			<LineupGrid />
-			<GalleryGrid />
-			<ScheduleList />
+			<ShowcasePanel id="start" lead {...site.hero} />
+			<ShowcasePanel id="vol4" {...site.next} />
+			<EditionsSection />
+			<ArchiveSection />
 			<ShowcasePanel
 				id="location"
 				eyebrow={site.venue.eyebrow}

@@ -21,3 +21,25 @@ ascenders — so headlines read as the album does.
 Self-hosted rather than pulled from a font CDN: this is a German site with no backend, and
 a third-party font request would be both a privacy problem and the only network call the
 page cannot control.
+
+---
+
+`JetBrains Mono` — the utility face. Everything technical is set in it: indices
+(`01 / 08`), dates, times, counts, status labels, the metadata line at the bottom edge.
+
+## Why a second face
+
+Adventor carries the signs; a monospace carries the instruments. Setting the technical
+type apart — small, uppercase, letter-spaced, tabular figures — is what makes the page read
+as engineered rather than decorated. JetBrains Mono was drawn for long reading at small
+sizes and its figures are unambiguous, which is the whole job here.
+
+## Provenance
+
+- Source: Google Fonts' `latin` subset of JetBrains Mono v24 (Regular only — the labels
+  are never bold), saved as `jetbrainsmono-regular.woff2`.
+- The subset covers `U+0000-00FF`, so the German umlauts and `ß` are included.
+- Licence: SIL Open Font License 1.1, full text in `JETBRAINS-MONO-OFL.txt`.
+  It permits redistribution; keep that file next to the fonts.
+
+Self-hosted for the same reason as Adventor: no third-party font request.

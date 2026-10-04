@@ -3,9 +3,12 @@ import { useEffect, useState } from "react";
 import { site } from "#/content/site";
 
 /**
- * Apple's global nav, rebuilt: a 48px bar that stays at the top, translucent with a
- * saturated blur so the photos behind it stay visible, 12px links with no underline, and
- * a full-height menu instead of the link row below `md`.
+ * The top chrome: a 48px bar that stays at the top, transparent over the opening frame and
+ * blurring into the page once it has moved. The wordmark is set in display type because it
+ * is a sign; the navigation is set small, upright and wide because it is a legend.
+ *
+ * Below `md` the link row is replaced by a full-height menu, numbered like the sections it
+ * points at.
  */
 export function SiteHeader() {
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -35,13 +38,13 @@ export function SiteHeader() {
 						{site.name}
 					</Link>
 
-					<ul className="mx-auto hidden items-center gap-7 md:flex">
+					<ul className="mx-auto hidden items-center gap-10 md:flex">
 						{site.nav.map((item) => (
 							<li key={item.hash}>
 								<Link
 									to={item.to}
 									hash={item.hash}
-									className="font-display text-ink/80 text-xs transition-colors hover:text-ink"
+									className="font-display text-label text-ink/70 uppercase tracking-label transition-colors hover:text-ink"
 								>
 									{item.label}
 								</Link>
@@ -53,7 +56,7 @@ export function SiteHeader() {
 						href={site.instagram.url}
 						target="_blank"
 						rel="noreferrer"
-						className="hidden font-display text-ink/80 text-xs transition-colors hover:text-ink md:block"
+						className="hidden font-display text-label text-ink/70 uppercase tracking-label transition-colors hover:text-ink md:block"
 					>
 						Instagram
 					</a>
@@ -88,15 +91,16 @@ export function SiteHeader() {
 				className="fixed inset-x-0 top-header bottom-0 z-40 overflow-y-auto bg-canvas/95 backdrop-blur-2xl md:hidden"
 			>
 				<ul className="mx-auto max-w-6xl px-5 pt-2 pb-10">
-					{site.nav.map((item) => (
+					{site.nav.map((item, i) => (
 						<li key={item.hash} className="border-hairline border-b">
 							<Link
 								to={item.to}
 								hash={item.hash}
 								onClick={() => setMenuOpen(false)}
-								className="block py-4 font-display text-xl"
+								className="flex items-baseline gap-4 py-4"
 							>
-								{item.label}
+								<span className="label text-ink/35">{String(i + 1).padStart(2, "0")}</span>
+								<span className="font-display text-xl tracking-brand">{item.label}</span>
 							</Link>
 						</li>
 					))}
@@ -106,9 +110,10 @@ export function SiteHeader() {
 							target="_blank"
 							rel="noreferrer"
 							onClick={() => setMenuOpen(false)}
-							className="block py-4 font-display text-xl"
+							className="flex items-baseline gap-4 py-4"
 						>
-							Instagram
+							<span className="label text-ink/35">↗</span>
+							<span className="font-display text-xl tracking-brand">Instagram</span>
 						</a>
 					</li>
 				</ul>

@@ -26,14 +26,28 @@
 	font-display: swap;
 }
 
+/*
+ * The utility face. Everything technical is set in it — indices, dates, times, counts,
+ * status labels, the metadata line along the bottom edge. Latin subset, Regular only:
+ * these labels are never bold and never larger than 12px.
+ */
+@font-face {
+	font-family: "JetBrains Mono";
+	src: url("/fonts/jetbrainsmono-regular.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
 @theme {
 	/* Design tokens live here (Tailwind v4 is CSS-first, no tailwind.config). */
 
 	/*
-	 * Two faces, two jobs. `display` carries everything the visitor reads as a sign —
-	 * headlines, the wordmark, the navigation, buttons, labels. `sans` keeps running prose
-	 * legible: Avant Garde's huge x-height and circular forms are built for headlines and
-	 * get tiring in a paragraph. The fallbacks are the geometric sans-serifs closest to it.
+	 * Three faces, three jobs. `display` carries everything the visitor reads as a sign —
+	 * headlines, the wordmark, buttons. `mono` carries everything the visitor reads as an
+	 * instrument — indices, dates, counts, status. `sans` keeps running prose legible:
+	 * Avant Garde's huge x-height and circular forms are built for headlines and get
+	 * tiring in a paragraph.
 	 *
 	 * Adventor ships Regular and Bold only, so display type is `font-bold` or nothing —
 	 * there are no mid weights to reach for.
@@ -41,6 +55,9 @@
 	--font-display:
 		"TeX Gyre Adventor", "Century Gothic", "URW Gothic", "Avant Garde", "Futura", ui-sans-serif,
 		sans-serif;
+
+	--font-mono:
+		"JetBrains Mono", ui-monospace, "SFMono-Regular", "Roboto Mono", Menlo, Consolas, monospace;
 
 	/* Apple's own stack: SF Pro on Apple platforms, the platform UI font elsewhere. */
 	--font-sans:
@@ -55,6 +72,13 @@
 	--color-ink-muted: #a1a1a6;
 	--color-hairline: #29292d;
 
+	/*
+	 * The one light value on the site, and the only place the page inverts. Warmer than
+	 * white on purpose: against this cream the dark reads as *night* rather than as *off*.
+	 * Spend it once per page — here, the closing panel.
+	 */
+	--color-paper: #fcf8ef;
+
 	/* Accents sampled from the RELAPSE poster artwork (green chrome type, pink hearts). */
 	--color-relapse: #5ee34a;
 	--color-relapse-pink: #ff2d78;
@@ -64,9 +88,58 @@
 	 * the letters almost touch. Only for display sizes — below ~30px it closes up.
 	 */
 	--tracking-brand: -0.04em;
+	/* The opposite end: mono labels are set wide so they read as a caption, not a word. */
+	--tracking-label: 0.16em;
+
+	/* The wordmark, sized off the viewport so it fills the frame at every width. */
+	--text-brand: clamp(3.5rem, 15vw, 9rem);
+	--text-brand--line-height: 0.84;
+	/*
+	 * Section headings. Sized off the viewport like the wordmark, and deliberately a long
+	 * way below it: the wordmark is the only thing on the site allowed to be large. These
+	 * used to be `font-bold text-6xl`, which on a face with Avant Garde's x-height reads
+	 * as a sports poster. Set in the regular weight at the brand tracking, they read as
+	 * the wordmark's quieter relatives, which is the whole idea.
+	 */
+	--text-section: clamp(1.75rem, 3.6vw, 2.75rem);
+	--text-section--line-height: 1.06;
+	/*
+	 * The size a *name* is set at inside a list — an act in the lineup, an edition in the
+	 * table. Display type like the two above it, and a clamp like them too, so the size
+	 * travels with the viewport instead of jumping at a breakpoint.
+	 */
+	--text-entry: clamp(1.125rem, 1.4vw, 1.25rem);
+	--text-entry--line-height: 1.25;
+
+	/* The one size every mono label is set at. */
+	--text-label: 0.6875rem;
+	--text-label--line-height: 1.45;
+
+	/*
+	 * Two curves for the whole site. The first is almost symmetric — hard in, hard out —
+	 * and is what gives large movement its weight; the second is for small UI. Anything
+	 * that needs a third curve is probably doing too much.
+	 */
+	--ease-big: cubic-bezier(0.887, 0, 0.113, 1);
+	--ease-ui: cubic-bezier(0.4, 0, 0.15, 1);
 
 	/* The sticky header's height. Sections offset their scroll anchor by it. */
 	--spacing-header: 3rem;
+	/* The metadata line pinned to the bottom edge. The page reserves this much for it. */
+	--spacing-metaline: 2.25rem;
+}
+
+/*
+ * The mono label, as one utility rather than five classes repeated forty times. Used for
+ * every index, date, count and status on the site.
+ */
+@utility label {
+	font-family: var(--font-mono);
+	font-size: var(--text-label);
+	line-height: var(--text-label--line-height);
+	letter-spacing: var(--tracking-label);
+	text-transform: uppercase;
+	font-variant-numeric: tabular-nums;
 }
 
 @layer base {
@@ -78,6 +151,8 @@
 	}
 	body {
 		@apply min-h-dvh bg-canvas text-ink antialiased;
+		/* Nothing may end up underneath the fixed metadata line. */
+		padding-block-end: var(--spacing-metaline);
 	}
 
 	/*
@@ -97,6 +172,11 @@
 		outline-offset: 3px;
 		border-radius: 2px;
 	}
+	/* Except where the page inverts: green on cream is about 1.7:1, and a focus ring
+	   has to reach 3:1 against what is behind it to be a focus ring at all. */
+	[data-ground="paper"] :focus-visible {
+		outline-color: var(--color-canvas);
+	}
 
 	/*
 	 * Smooth scrolling is the one thing here that moves the whole viewport, so it is the
@@ -114,27 +194,33 @@
 /*
  * Motion.
  *
- * State comes from `src/lib/scroll-motion.ts`; this file is only the two
- * appearances it switches between, plus the entrance that runs on load.
+ * State comes from `src/lib/scroll-motion.ts`; this file is only the appearances it
+ * switches between, plus the entrance that runs on load.
  *
- * History worth keeping, because both mistakes are easy to repeat. The first
- * pass used CSS scroll timelines (`animation-timeline: view()`), which measured
- * correctly in Chromium and did nothing in the browser it was built for — a
- * silent failure, since its fallback is "content simply appears". The second
- * pass worked but was far too timid to notice. These values are deliberately
- * large: 2.5rem of travel, a 900ms curve, and a stagger between siblings, which
- * is what makes a reveal read as intentional rather than as a repaint.
+ * History worth keeping, because both mistakes are easy to repeat. The first pass used
+ * CSS scroll timelines (`animation-timeline: view()`), which measured correctly in
+ * Chromium and did nothing in the browser it was built for — a silent failure, since its
+ * fallback is "content simply appears". The second pass worked but was far too timid to
+ * notice. These values are deliberately large, which is what makes a reveal read as
+ * intentional rather than as a repaint.
  *
- * Reduced motion stays tiered rather than switched off: the travel, the scaling
- * and the ticker go; a short cross-fade remains, so the page still reads as
- * composed instead of dead.
+ * `.reveal` is the hook the observer looks for; the modifiers next to it decide what
+ * actually moves. Only one of the three is ever on an element:
+ *
+ *   .reveal              fade and rise      — for blocks of several things
+ *   .reveal .mask-reveal line out of a mask — for headlines
+ *   .reveal .wipe-reveal a clip-path wipe   — for photographs
+ *
+ * Reduced motion stays tiered rather than switched off: the travel, the scaling and the
+ * ticker go; a short cross-fade remains, so the page still reads as composed instead of
+ * dead.
  */
 @layer components {
 	/* --- Reveals on scroll ------------------------------------------------- */
 	.reveal {
 		transition:
-			opacity 900ms cubic-bezier(0.16, 1, 0.3, 1),
-			transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+			opacity 900ms var(--ease-big),
+			transform 900ms var(--ease-big);
 		transition-delay: var(--reveal-delay, 0ms);
 	}
 	.reveal[data-reveal="pending"] {
@@ -142,10 +228,10 @@
 		transform: translateY(2.5rem) scale(0.97);
 	}
 
-	/* --- The hero, on load ------------------------------------------------- */
-	/* The wordmark wipes up from behind its own edge; everything under it
-	   follows in sequence. Pure CSS, so it plays whether or not the bundle
-	   has booted. */
+	/* --- Type that arrives out of a mask ------------------------------------ */
+	/* The line is clipped by its own box and slides up into it. The text is visible
+	   at rest and animates from there — never parked at `opacity: 0` waiting for a
+	   script that may never arrive. */
 	.mask-line {
 		display: block;
 		overflow: clip;
@@ -160,13 +246,47 @@
 		display: block;
 	}
 
+	/* Modifier: the block itself holds still, only the line inside it travels. */
+	.mask-reveal[data-reveal="pending"] {
+		opacity: 1;
+		transform: none;
+	}
+	.mask-reveal .mask-line > span {
+		transition: transform 1100ms var(--ease-big);
+		transition-delay: var(--reveal-delay, 0ms);
+	}
+	.mask-reveal[data-reveal="pending"] .mask-line > span {
+		transform: translateY(110%);
+	}
+
+	/* --- Photographs that arrive as a cut ----------------------------------- */
+	/* A directional wipe rather than a fade: `clip-path` is cheap, runs on the
+	   compositor, and reads like a film cut instead of a loading state. */
+	.wipe-reveal[data-reveal="pending"] {
+		opacity: 1;
+		transform: none;
+	}
+	.wipe-reveal > * {
+		clip-path: inset(0 0 0 0);
+		transition: clip-path 1100ms var(--ease-big);
+		transition-delay: var(--reveal-delay, 0ms);
+	}
+	.wipe-reveal[data-reveal="pending"] > * {
+		clip-path: inset(0 0 0 100%);
+	}
+
+	/* --- The hero, on load ------------------------------------------------- */
+	/* The wordmark wipes up from behind its own edge; everything under it
+	   follows in sequence. Pure CSS, so it plays whether or not the bundle
+	   has booted. */
 	@media (prefers-reduced-motion: no-preference) {
 		.hero-enter .mask-line > span {
-			animation: mask-up 1200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+			animation: mask-up 1200ms var(--ease-big) both;
 		}
 		.hero-enter .hero-edition,
 		.hero-enter > :nth-child(2),
-		.hero-enter > :nth-child(3) {
+		.hero-enter > :nth-child(3),
+		.hero-enter > :nth-child(4) {
 			animation: rise-up 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
 		}
 		.hero-enter .hero-edition {
@@ -177,6 +297,9 @@
 		}
 		.hero-enter > :nth-child(3) {
 			animation-delay: 560ms;
+		}
+		.hero-enter > :nth-child(4) {
+			animation-delay: 700ms;
 		}
 	}
 
@@ -191,19 +314,130 @@
 		transform: translateY(var(--exit-rise, 0px));
 	}
 
-	/* --- Ticker -------------------------------------------------------------- */
-	.ticker-track {
-		display: flex;
-		width: max-content;
-		animation: ticker 42s linear infinite;
+	/* --- The diptych --------------------------------------------------------- */
+	/* Two halves divided by one hairline. Pointing at a half grows it and shrinks
+	   its neighbour; letting go returns them to equal. Below `md` the halves are
+	   stacked and the whole thing stands still — there is nothing to point with. */
+	@media (min-width: 48rem) {
+		.diptych-half {
+			flex: 1 1 0;
+			transition: flex-grow 600ms var(--ease-big);
+		}
+		@media (prefers-reduced-motion: no-preference) {
+			.diptych:hover .diptych-half,
+			.diptych:focus-within .diptych-half {
+				flex-grow: 0.8;
+			}
+			.diptych-half:hover,
+			.diptych-half:focus-within {
+				flex-grow: 1.6;
+			}
+		}
 	}
-	/* WCAG 2.2.2 wants a way to stop motion that runs longer than five seconds. */
-	.ticker:hover .ticker-track,
-	.ticker:focus-within .ticker-track {
-		animation-play-state: paused;
+
+	/* --- The metadata line -------------------------------------------------- */
+	/* The HUD of a camera: four slots along the bottom edge that read whatever
+	   section the page is currently in. The progress rule is its top border. */
+	.meta-progress {
+		transform: scaleX(var(--scroll-progress, 0));
+		transform-origin: left;
+	}
+	.meta-slot > b {
+		font-weight: 400;
+		color: var(--color-ink);
+	}
+
+	/* --- The photographic treatment ----------------------------------------- */
+	/* Every photograph on the site is developed the same way: monochrome, with the
+	   contrast pushed a little to hold the blacks. Three references — the Dior Homme
+	   Intense spot, the YSL Parisienne film, the c4rl video — and none of them has a
+	   second colour in the frame. These are phone photographs of a club lit in teal,
+	   amber and violet; in colour they read as snapshots, and in black and white the
+	   same files read as a body of work. It is one CSS filter and it changes the
+	   register of the entire page.
+
+	   Colour comes back on the archive frames alone, on hover, over a slow beat. That
+	   is the reward for going near a photograph, and it is the only place the site
+	   remembers what the night actually looked like. */
+	/* `--lift` is per-frame exposure and defaults to 1, so any photograph that has
+	   not been measured is simply printed as it arrived. Every photograph that has
+	   been measured carries its own value — see `site.archive`. */
+	.plate {
+		filter: grayscale(1) brightness(var(--lift, 1)) contrast(1.08);
+		transition: filter 1200ms var(--ease-big);
+		/* Set per frame by `.strip` below, so a row comes back as a sweep rather than
+		   as four simultaneous switches. Zero everywhere else. */
+		transition-delay: var(--plate-delay, 0ms);
+	}
+	.plate-colour:hover .plate,
+	.plate-colour:focus-within .plate {
+		filter: grayscale(0) brightness(var(--lift, 1)) contrast(1);
+	}
+
+	/* --- The strip -------------------------------------------------------- */
+	/* Resting on a frame used to bring that one frame back and leave its neighbours
+	   grey, which reads as inspecting a thumbnail. But a contact sheet is cut into
+	   strips, and a strip — not a frame — is the unit a photographer picks up and
+	   holds to the light. So the whole row comes back together, and it arrives as a
+	   sweep from the left: 70ms between frames, against the 1200ms the colour itself
+	   takes, so the row reads as one gesture rather than as a queue.
+
+	   The delay is only set from `sm` up. That is where the sheet is four frames wide
+	   and a strip is exactly one visual row; below it the strip folds onto two lines,
+	   where a left-to-right sweep would run diagonally and mean nothing — and where
+	   there is no pointer to start it anyway. */
+	@media (min-width: 40rem) {
+		.strip > :nth-child(2) {
+			--plate-delay: 70ms;
+		}
+		.strip > :nth-child(3) {
+			--plate-delay: 140ms;
+		}
+		.strip > :nth-child(4) {
+			--plate-delay: 210ms;
+		}
+	}
+
+	/* --- The contact sheet, and the one frame that is the select ------------- */
+	/* A sheet where every frame is developed the same way has nothing chosen on
+	   it, and the eye has nowhere to land. So the archive is printed the way a
+	   photographer marks a roll: one frame keeps its colour, and every other
+	   frame is monochrome and held a stop below it, so the select reads as *lit*
+	   rather than merely saturated.
+
+	   `--lift` is per-frame exposure, set on the element from `site.archive`.
+	   It matters more than it looks. These are phone photographs of a dark room
+	   and they arrive 5.2x apart in brightness; a single filter cannot serve them,
+	   because a multiplier applied to an already-black frame produces a hole, not
+	   a picture. Printing each frame to its own exposure lands them all in one
+	   narrow band, which is the only way the sheet reads as a set of photographs
+	   with one chosen from among them rather than one photograph in a field of
+	   black squares.
+
+	   `contrast(0.95)` then compresses that band slightly toward mid-grey — the
+	   last thing these want is more contrast, since their shadows are already at
+	   the floor.
+
+	   Both are single-class rules declared after `.plate` so they win at equal
+	   specificity, and both inherit its 1200ms beat: a photograph changing state
+	   is cinematic, never a UI tick. `.plate-colour:hover .plate` above is heavier
+	   than either, so the pointer brings any frame back to colour over that same
+	   beat — keeping its own exposure, so only the colour changes and the frame
+	   does not jump in brightness. */
+	.plate-dim {
+		filter: grayscale(1) brightness(var(--lift, 1)) contrast(0.95);
+	}
+	.plate-lit {
+		filter: grayscale(0) brightness(var(--lift, 1)) contrast(1);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
+		/* The strip still lights as one, but all at once: a sweep is motion, and the
+		   colour is the part that carries the meaning. Set before the reveal rules
+		   below so it does not sit under a heavier `> *` selector. */
+		.strip > * {
+			--plate-delay: 0ms;
+		}
 		/* Tier 2 — the displacement goes, a short cross-fade remains. */
 		.reveal {
 			transition: opacity 220ms ease;
@@ -212,6 +446,17 @@
 		.reveal[data-reveal="pending"] {
 			transform: none;
 		}
+		/* A masked line and a wipe are both pure displacement, so both are replaced
+		   by the same short fade rather than left running. */
+		.mask-reveal[data-reveal="pending"],
+		.wipe-reveal[data-reveal="pending"] {
+			opacity: 0;
+		}
+		.mask-reveal[data-reveal="pending"] .mask-line > span,
+		.wipe-reveal[data-reveal="pending"] > * {
+			transform: none;
+			clip-path: inset(0 0 0 0);
+		}
 		/* Tier 1 — large travelling surfaces and endless motion are removed. */
 		.scroll-zoom,
 		.hero-exit {
@@ -219,9 +464,6 @@
 		}
 		.hero-exit {
 			opacity: 1;
-		}
-		.ticker-track {
-			animation: none;
 		}
 	}
 }
@@ -243,14 +485,5 @@
 	to {
 		opacity: 1;
 		transform: none;
-	}
-}
-
-@keyframes ticker {
-	from {
-		transform: translateX(0);
-	}
-	to {
-		transform: translateX(-50%);
 	}
 }

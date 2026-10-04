@@ -1,7 +1,8 @@
 /**
  * Scroll motion for the site: staggered section reveals, photographs that
- * travel as their panel passes, the hero falling away, and the header
- * background that appears once the page has moved.
+ * travel as their panel passes, the hero falling away, the header background
+ * that appears once the page has moved, and the metadata line along the bottom
+ * edge, which reads whichever section the page is currently in.
  *
  * Two earlier attempts are worth remembering. The first drove everything from
  * CSS scroll timelines (`animation-timeline: view()`); it measured correctly in
@@ -67,19 +68,60 @@ export function initScrollMotion(): () => void {
 	}
 
 	// --- Per-frame work ----------------------------------------------------
-	// The header switch is a colour change and safe for everyone. The travelling
-	// photographs and the falling hero are large moving surfaces — vestibular
-	// triggers — so they are not wired up at all when reduced motion is asked for.
+	// The header switch is a colour change and safe for everyone, and so is the
+	// metadata line, which only ever rewrites text. The travelling photographs and
+	// the falling hero are large moving surfaces — vestibular triggers — so they
+	// are not wired up at all when reduced motion is asked for.
 	const panels = reduced ? [] : [...document.querySelectorAll<HTMLElement>(".scroll-zoom")];
 	const heroes = reduced ? [] : [...document.querySelectorAll<HTMLElement>(".hero-exit")];
 	const root = document.documentElement;
 	let frame = 0;
+
+	// --- The metadata line -------------------------------------------------
+	// Each section carries its own four values as data attributes, written into
+	// the HTML at build time, so the line is a readout of the markup rather than a
+	// second copy of the content. The slots are filled with the first section's
+	// values already, which is what a visitor without JavaScript keeps seeing.
+	const metaSections = [...document.querySelectorAll<HTMLElement>("[data-meta-name]")];
+	// `data-meta-slot="name"` on the slot reads `data-meta-name` off the section,
+	// which in `dataset` is the camel-cased `metaName`.
+	const metaSlots = new Map<string, HTMLElement>();
+	for (const slot of document.querySelectorAll<HTMLElement>("[data-meta-slot]")) {
+		const key = slot.dataset.metaSlot;
+		if (key) metaSlots.set(`meta${key.charAt(0).toUpperCase()}${key.slice(1)}`, slot);
+	}
+	let activeSection: HTMLElement | null = null;
+
+	const updateMetaLine = (viewport: number) => {
+		// The section that owns the line is the last one to have reached the upper
+		// third of the viewport — the same point the eye is reading from.
+		const line = viewport * 0.35;
+		let current = metaSections[0] ?? null;
+		for (const section of metaSections) {
+			if (section.getBoundingClientRect().top <= line) current = section;
+		}
+		if (!current || current === activeSection) return;
+		activeSection = current;
+		for (const [key, slot] of metaSlots) {
+			const value = current.dataset[key];
+			if (value !== undefined) slot.textContent = value;
+		}
+	};
 
 	const update = () => {
 		frame = 0;
 		root.toggleAttribute("data-scrolled", window.scrollY > 8);
 
 		const viewport = window.innerHeight;
+
+		// The rule along the top of the metadata line: 0 at the top, 1 at the end.
+		const scrollable = document.documentElement.scrollHeight - viewport;
+		root.style.setProperty(
+			"--scroll-progress",
+			String(scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0),
+		);
+
+		if (metaSlots.size > 0) updateMetaLine(viewport);
 
 		for (const el of panels) {
 			const rect = el.getBoundingClientRect();

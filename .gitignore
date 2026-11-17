@@ -39,3 +39,13 @@ coverage
 
 # Playwright MCP scratch output (screenshots, snapshots, console logs)
 .playwright-mcp
+
+# Sanity: the build-time snapshot of the archive (written by scripts/pull-archive.ts),
+# the Studio's build output and extracted schema, and the Blueprint's local stack link.
+src/content/archive.sanity.json
+studio/dist
+studio/.sanity
+studio/schema.json
+.sanity
+# The bundle `blueprints deploy` writes next to each function before uploading it.
+functions/**/.build

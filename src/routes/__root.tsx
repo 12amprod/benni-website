@@ -1,12 +1,10 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { type ReactNode, useEffect } from "react";
-import { MetaLine } from "#/components/MetaLine";
+import type { ReactNode } from "react";
 import { NotFound } from "#/components/NotFound";
 import { SiteFooter } from "#/components/SiteFooter";
-import { SiteHeader } from "#/components/SiteHeader";
+import { SiteSidebar } from "#/components/SiteSidebar";
 import { site } from "#/content/site";
-import { initScrollMotion } from "#/lib/scroll-motion";
 import appCss from "#/styles.css?url";
 
 export const Route = createRootRoute({
@@ -34,10 +32,10 @@ export const Route = createRootRoute({
 		links: [
 			{ rel: "stylesheet", href: appCss },
 			{ rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
-			// The display face sets the headline, the wordmark and the nav — everything
-			// above the fold. Without the preload the browser only discovers it after the
-			// stylesheet parses and the hero visibly swaps fonts. `crossorigin` is required
-			// on font preloads even same-origin, or the file is fetched twice.
+			// The display face sets the wordmark and the navigation, which are on screen
+			// from the first frame. Without the preload the browser only discovers it after
+			// the stylesheet parses and the sidebar visibly swaps fonts. `crossorigin` is
+			// required on font preloads even same-origin, or the file is fetched twice.
 			{
 				rel: "preload",
 				as: "font",
@@ -45,16 +43,8 @@ export const Route = createRootRoute({
 				href: "/fonts/texgyreadventor-regular.woff2",
 				crossOrigin: "anonymous",
 			},
-			{
-				rel: "preload",
-				as: "font",
-				type: "font/woff2",
-				href: "/fonts/texgyreadventor-bold.woff2",
-				crossOrigin: "anonymous",
-			},
-			// The mono face sets the metadata line, which is on screen from the first
-			// frame at the bottom edge, so it is discovered with the display faces
-			// rather than one stylesheet later.
+			// The mono face sets the tagline and every title over a series, so it is
+			// discovered with the display face rather than one stylesheet later.
 			{
 				rel: "preload",
 				as: "font",
@@ -85,19 +75,20 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 	);
 }
 
+/**
+ * The sidebar, and to its right one column that is nothing but the page and a ruled line
+ * under it. Below `lg` the sidebar is a bar on top and the column is the full width.
+ */
 function RootLayout() {
-	// The motion layer reads the DOM the prerender produced, so it is set up once
-	// here rather than per component. It returns its own teardown.
-	useEffect(() => initScrollMotion(), []);
-
 	return (
 		<>
-			<SiteHeader />
-			<main>
-				<Outlet />
-			</main>
-			<SiteFooter />
-			<MetaLine />
+			<SiteSidebar />
+			<div className="lg:pl-sidebar">
+				<main className="mx-auto max-w-6xl px-4 pt-4 pb-24 sm:px-6 lg:px-12 lg:pt-12 lg:pb-32">
+					<Outlet />
+				</main>
+				<SiteFooter />
+			</div>
 			<TanStackRouterDevtools position="bottom-right" />
 		</>
 	);

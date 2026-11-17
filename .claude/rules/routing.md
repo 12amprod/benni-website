@@ -43,8 +43,12 @@ Rules:
 - **Add the page to the navigation** in `src/content/site.ts` if a visitor should be able to
   reach it. A route no one links to is only prerendered because link crawling finds it —
   an orphan page silently disappears from the build.
-- **Data belongs in `loader`**, which runs at build time during prerender. Never fetch in a
-  `useEffect` for content that should be in the HTML.
+- **Content is baked in at build time**, from `src/content/`. CMS data arrives through
+  `scripts/pull-archive.ts` before the build, not through a `loader` — loaders re-run in the
+  browser on client-side navigation. Never fetch in a `useEffect` for content that should be
+  in the HTML.
+- **A page nothing links to must be listed in `pages` in `vite.config.ts`** (as `/admin` is),
+  or the crawler never finds it and it is missing from the build.
 - After adding or renaming a route file, run `pnpm build` (or leave `pnpm dev` running) to
   regenerate `src/routeTree.gen.ts`, then `pnpm typecheck`. Never edit that file by hand.
 - New routes are prerendered automatically — no config to update. Confirm it in the build

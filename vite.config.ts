@@ -17,10 +17,14 @@ export default defineConfig({
 					prerender: { outputPath: "/404.html", autoSubfolderIndex: false },
 					sitemap: { exclude: true },
 				},
+				// Nothing links to /admin, so the link crawler would never find it. Listed
+				// here so it is prerendered all the same; it forwards to the Sanity Studio.
+				{ path: "/admin", prerender: { enabled: true }, sitemap: { exclude: true } },
 			],
 			// Every route is rendered to static HTML at build time and nothing runs at
-			// request time, so `dist/client` is the whole deployable site. Loaders still
-			// run during the build, which is where a CMS fetch would plug in later.
+			// request time, so `dist/client` is the whole deployable site. Content from the
+			// CMS is pulled before this runs (`scripts/pull-archive.ts`) and baked in — not
+			// fetched in a loader, which would re-run in the browser on client navigation.
 			prerender: {
 				enabled: true,
 				crawlLinks: true,

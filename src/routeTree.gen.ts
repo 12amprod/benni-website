@@ -11,7 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as R404RouteImport } from './routes/404'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ImpressumRouteImport } from './routes/impressum'
+import { Route as RelapseRouteImport } from './routes/relapse'
+import { Route as SerienRouteImport } from './routes/serien'
+import { Route as VideosRouteImport } from './routes/videos'
+import { Route as YungShatteredRouteImport } from './routes/yung-shattered'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,40 +28,110 @@ const R404Route = R404RouteImport.update({
   path: '/404',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImpressumRoute = ImpressumRouteImport.update({
   id: '/impressum',
   path: '/impressum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelapseRoute = RelapseRouteImport.update({
+  id: '/relapse',
+  path: '/relapse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SerienRoute = SerienRouteImport.update({
+  id: '/serien',
+  path: '/serien',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const YungShatteredRoute = YungShatteredRouteImport.update({
+  id: '/yung-shattered',
+  path: '/yung-shattered',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/admin': typeof AdminRoute
   '/impressum': typeof ImpressumRoute
+  '/relapse': typeof RelapseRoute
+  '/serien': typeof SerienRoute
+  '/videos': typeof VideosRoute
+  '/yung-shattered': typeof YungShatteredRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/admin': typeof AdminRoute
   '/impressum': typeof ImpressumRoute
+  '/relapse': typeof RelapseRoute
+  '/serien': typeof SerienRoute
+  '/videos': typeof VideosRoute
+  '/yung-shattered': typeof YungShatteredRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/admin': typeof AdminRoute
   '/impressum': typeof ImpressumRoute
+  '/relapse': typeof RelapseRoute
+  '/serien': typeof SerienRoute
+  '/videos': typeof VideosRoute
+  '/yung-shattered': typeof YungShatteredRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/404' | '/impressum'
+  fullPaths:
+    | '/'
+    | '/404'
+    | '/admin'
+    | '/impressum'
+    | '/relapse'
+    | '/serien'
+    | '/videos'
+    | '/yung-shattered'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/404' | '/impressum'
-  id: '__root__' | '/' | '/404' | '/impressum'
+  to:
+    | '/'
+    | '/404'
+    | '/admin'
+    | '/impressum'
+    | '/relapse'
+    | '/serien'
+    | '/videos'
+    | '/yung-shattered'
+  id:
+    | '__root__'
+    | '/'
+    | '/404'
+    | '/admin'
+    | '/impressum'
+    | '/relapse'
+    | '/serien'
+    | '/videos'
+    | '/yung-shattered'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   R404Route: typeof R404Route
+  AdminRoute: typeof AdminRoute
   ImpressumRoute: typeof ImpressumRoute
+  RelapseRoute: typeof RelapseRoute
+  SerienRoute: typeof SerienRoute
+  VideosRoute: typeof VideosRoute
+  YungShatteredRoute: typeof YungShatteredRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +150,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof R404RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/impressum': {
       id: '/impressum'
       path: '/impressum'
       fullPath: '/impressum'
       preLoaderRoute: typeof ImpressumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relapse': {
+      id: '/relapse'
+      path: '/relapse'
+      fullPath: '/relapse'
+      preLoaderRoute: typeof RelapseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/serien': {
+      id: '/serien'
+      path: '/serien'
+      fullPath: '/serien'
+      preLoaderRoute: typeof SerienRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/yung-shattered': {
+      id: '/yung-shattered'
+      path: '/yung-shattered'
+      fullPath: '/yung-shattered'
+      preLoaderRoute: typeof YungShatteredRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -88,7 +198,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R404Route: R404Route,
+  AdminRoute: AdminRoute,
   ImpressumRoute: ImpressumRoute,
+  RelapseRoute: RelapseRoute,
+  SerienRoute: SerienRoute,
+  VideosRoute: VideosRoute,
+  YungShatteredRoute: YungShatteredRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

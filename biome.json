@@ -9,6 +9,7 @@
 		"includes": [
 			"**",
 			"!src/routeTree.gen.ts",
+			"!scripts/sanity.types.ts",
 			"!dist",
 			"!node_modules",
 			"!coverage",

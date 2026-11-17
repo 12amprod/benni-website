@@ -14,8 +14,11 @@ break at 3am.
 - `pnpm typecheck` — `tsc -b`, no emit
 - `pnpm check` — Biome lint + format + import order (read-only; `pnpm check:fix` writes)
 - `pnpm test` — Vitest, single run
-- `pnpm build` — build + prerender every route into `dist/client`
+- `pnpm build` — pull the archive from Sanity, then build + prerender every route into `dist/client`
 - `pnpm preview` — serve the built site locally, exactly as a host would
+- `pnpm content:pull` — refresh the archive snapshot from Sanity without building
+- `pnpm studio` — run the Sanity Studio locally (own deps: `pnpm --dir studio install` once)
+- `pnpm seed` — copy the local archive into Sanity (dry run; `--write` to execute)
 
 Verify every change with `pnpm typecheck && pnpm check`. A hook auto-formats each file you
 edit, so never spend a turn on formatting. Another hook runs typecheck + lint when you finish
@@ -26,7 +29,10 @@ and hands the errors back — fix them, never disable or work around them.
 - `src/routeTree.gen.ts` — written by the Start plugin whenever `pnpm dev` or `pnpm build`
   runs. Add or rename files in `src/routes/` and it updates itself. It is committed so that
   `pnpm typecheck` works on a fresh clone without a build first.
-- `pnpm-lock.yaml` — managed by pnpm. Use `pnpm add <pkg>`.
+- `pnpm-lock.yaml` (and `studio/pnpm-lock.yaml`) — managed by pnpm. Use `pnpm add <pkg>`.
+- `scripts/sanity.types.ts` — Sanity TypeGen output from the Studio schema and the queries in
+  `scripts/`. Committed so typecheck works without the Studio installed. Regenerate with
+  `pnpm --dir studio typegen` after changing the schema or a query.
 
 ## Structure & conventions
 
@@ -36,8 +42,21 @@ and hands the errors back — fix them, never disable or work around them.
   site layout (header, `<main>`, footer). Everything on every page goes through here.
 - `src/components/` — shared UI. PascalCase filename, named export, one component per file.
 - `src/content/site.ts` — site metadata and copy. **All user-facing text lives here**, not
-  inline in JSX, so that copy can be changed without touching components — and so a CMS can
-  replace this one module later without a rewrite.
+  inline in JSX, so that copy can be changed without touching components.
+- `src/content/archive.ts` — every work the site renders; `galleries.ts` decides which gallery page
+  (`/`, `/videos`, `/serien`, `/yung-shattered`, `/relapse`) shows which. Reads the Sanity snapshot if the
+  build pulled one, otherwise `archive.local.ts`. Components import from here, never from
+  either source directly.
+- `studio/` — the Sanity Studio (the team's admin), its own package with its own deps.
+  `studio/shared/` holds what Studio, build and site must agree on: the project ID and the
+  archive rules (pages, segments, frames per series).
+- `functions/` + `sanity.blueprint.ts` — code that runs on Sanity's servers (the Instagram
+  import). Deployed with `npx sanity@latest blueprints deploy`, never on the site's host.
+  Each function has its own `package.json`: the deploy bundles a function with Vite rooted at
+  the nearest `node_modules`, and without its own that is the repo root — where the site's
+  `vite.config.ts` (TanStack Start) takes over the bundle and the deploy fails with "no
+  `handler` export found". Run `pnpm --dir functions/<name> install` before deploying.
+- `scripts/pull-archive.ts` — the build-time bridge from Sanity to the site.
 - `src/styles.css` — the Tailwind entry point and the design tokens (`@theme`). There is no
   `tailwind.config.js` in Tailwind v4; tokens are CSS variables in this file.
 - `src/test/` — Vitest setup plus `renderWithRouter()`, which you need for any component
@@ -71,13 +90,27 @@ is ever needed, add Paraglide rather than hand-rolling one.
   per page, `alt` on every image, visible focus states. Do not add ARIA to paper over a
   `<div>` that should have been a `<button>`.
 
-## Data and the future CMS
+## Data and the CMS
 
-Route loaders run **at build time**, not in the browser. That is where a CMS fetch belongs when
-one is added — the content ends up baked into the HTML and the site stays static. Do not add
-client-side fetching on first paint, and do not add a server, an API route or a database
-without being asked. Hardcoded content in `src/content/site.ts` is the right answer until
-there is a reason for more.
+The archive is edited in **Sanity** (setup and team guide: `docs/cms.md`). It reaches the
+site **at build time only**: `scripts/pull-archive.ts` runs before `vite build`, fetches the
+published, visible works, computes every frame's 4:5 grid crops and full-size URL, and writes
+`src/content/archive.sanity.json` (generated, gitignored). `archive.ts` reads that file if it
+exists and falls back to `archive.local.ts` if not. While `projectId` in
+`studio/shared/project.ts` is empty, every build — local, CI, host — skips the pull and uses
+the local archive, exactly as the site looked before the CMS. Once it is set, every build
+pulls; the dataset is publicly readable, so no token is needed anywhere.
+
+Do not move the fetch into a route loader. TanStack runs loaders **in the browser** on
+client-side navigation, so a visitor clicking from `/impressum` to `/` would query Sanity
+live. Nothing on the live site talks to Sanity, and that stays true.
+
+If Sanity is configured and the pull fails, the build fails on purpose — the host keeps the
+last good deploy instead of silently shipping the local fallback.
+
+`/admin` is a static redirect to the hosted Studio. There is no login, session or API route
+on this site; authentication is Sanity's. Do not add a server, an API route or a database
+without being asked.
 
 ## Adding dependencies
 

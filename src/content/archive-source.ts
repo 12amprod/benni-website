@@ -21,6 +21,14 @@ export type ArchivePhotoSource = {
 	srcSet?: string;
 	/** The whole picture, uncropped and large, for the enlarged view. */
 	full: string;
+	/** The whole picture at the smaller sizes a phone wants. CDN frames only. */
+	fullSrcSet?: string;
+	/**
+	 * `full`'s size in pixels, so the enlarged view holds the picture's place before it has
+	 * loaded and the grid frame can grow into the right shape. CDN frames only.
+	 */
+	width?: number;
+	height?: number;
 	alt: string;
 };
 

@@ -41,12 +41,50 @@ const OUT = new URL("../src/content/archive.sanity.json", import.meta.url);
  * shadows are where a low setting bands first.
  */
 const PORTRAIT = { fit: "crop", auto: "format", quality: 82 } as const;
-/* `max-w`/`max-h` rather than width and height: given both, the builder cuts around the
-   hotspot to that aspect, which here would turn every picture into a square. */
-const WHOLE = { maxWidth: 2400, maxHeight: 2400, auto: "format", quality: 85 } as const;
+const WHOLE = { auto: "format", quality: 85 } as const;
+/* The enlarged view's sizes, each a box the whole picture is fitted into — `max-w`/`max-h`
+   rather than width and height, because given both the builder cuts around the hotspot
+   to that aspect and every picture would come out square. The CDN never upscales, so a
+   small original simply stops at its own size. The largest box is `full`; the smaller
+   ones save a phone downloading 2400 pixels for a screen 1200 wide. */
+const FULL_BOX = 2400;
+const WHOLE_BOXES = [1080, 1600, FULL_BOX] as const;
 /** Grid widths for `srcset`. A grid column is at most ~36rem, so 1600 covers a 2x screen. */
 const GRID_WIDTHS = [480, 800, 1200, 1600] as const;
 const GRID_SRC_WIDTH = 800;
+
+type Size = { width: number; height: number };
+
+/**
+ * The size of the whole picture before it is fitted: the original upload, less any crop the
+ * team set in the Studio — which the builder has already worked out and written into the
+ * URL as `rect`. The original's size is part of every Sanity asset ID
+ * (`image-<hash>-1536x1920-jpg`), so no second query is needed.
+ */
+function wholeSize(assetRef: string, url: string): Size | undefined {
+	const rect = new URL(url).searchParams.get("rect");
+	const [width, height] = rect
+		? rect.split(",").slice(2).map(Number)
+		: (/-(\d+)x(\d+)-\w+$/.exec(assetRef)?.slice(1).map(Number) ?? []);
+	return width && height ? { width, height } : undefined;
+}
+
+/** `size` fitted into a `box` × `box` square, as the CDN does it: shrunk, never grown. */
+function fitted({ width, height }: Size, box: number): Size {
+	const scale = Math.min(1, box / Math.max(width, height));
+	return { width: Math.round(width * scale), height: Math.round(height * scale) };
+}
+
+/**
+ * The `srcset` of the whole picture, one entry per distinct width. Where two boxes yield
+ * the same picture the larger box's URL wins, so the largest entry is always `full` itself
+ * and the browser never fetches one picture under two addresses.
+ */
+function renditions(size: Size, url: (box: number) => string) {
+	const byWidth = new Map<number, string>();
+	for (const box of WHOLE_BOXES) byWidth.set(fitted(size, box).width, url(box));
+	return [...byWidth].map(([width, src]) => `${src} ${width}w`).join(", ");
+}
 
 const soft = process.argv.includes("--soft");
 const log = (message: string) => console.log(`[archive] ${message}`);
@@ -127,10 +165,24 @@ async function pull(): Promise<ArchiveSnapshot> {
 						.withOptions({ ...PORTRAIT, width, height: Math.round(width * 1.25) })
 						.url();
 
+				const whole = (box: number) =>
+					images
+						.image(photo)
+						.withOptions({ ...WHOLE, maxWidth: box, maxHeight: box })
+						.url();
+				const full = whole(FULL_BOX);
+				const size = wholeSize(photo.asset?._ref ?? "", full);
+
 				return {
 					src: grid(GRID_SRC_WIDTH),
 					srcSet: GRID_WIDTHS.map((width) => `${grid(width)} ${width}w`).join(", "),
-					full: images.image(photo).withOptions(WHOLE).url(),
+					full,
+					...(size
+						? {
+								...fitted(size, FULL_BOX),
+								fullSrcSet: renditions(size, whole),
+							}
+						: {}),
 					alt: photo.alt ?? "",
 				};
 			}),

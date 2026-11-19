@@ -1,9 +1,11 @@
 import type { ArchivePhoto, ArchiveWork } from "#/content/archive";
-import { enlargeOnClick, FrameImage, frameLinkClass } from "./Frame";
+import { arrival, enlargeLink, FrameImage, frameLinkClass } from "./Frame";
 
 type WorkTilesProps = {
 	works: readonly ArchiveWork[];
 	eager?: boolean;
+	/** Where the first tile falls on the page, counting every frame above it. */
+	firstFrame: number;
 	onEnlarge: (photo: ArchivePhoto) => void;
 };
 
@@ -16,7 +18,7 @@ type WorkTilesProps = {
  * and the films live where they were posted. A cover or a shoot enlarges like any other
  * frame. Nothing is printed over a picture.
  */
-export function WorkTiles({ works, eager = false, onEnlarge }: WorkTilesProps) {
+export function WorkTiles({ works, eager = false, firstFrame, onEnlarge }: WorkTilesProps) {
 	return (
 		<ul className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-6 lg:gap-x-10 lg:gap-y-12">
 			{works.map((work, i) => {
@@ -26,12 +28,11 @@ export function WorkTiles({ works, eager = false, onEnlarge }: WorkTilesProps) {
 				if (!photo) return null;
 
 				return (
-					<li key={work.url}>
+					<li key={work.url} {...arrival(firstFrame + i)}>
 						<a
-							href={work.video ? work.url : photo.full}
 							{...(work.video
-								? { target: "_blank", rel: "noreferrer" }
-								: { onClick: enlargeOnClick(() => onEnlarge(photo)) })}
+								? { href: work.url, target: "_blank", rel: "noreferrer" }
+								: enlargeLink(photo, () => onEnlarge(photo)))}
 							className={frameLinkClass}
 						>
 							<FrameImage photo={photo} eager={eager && i < 4} />

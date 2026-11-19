@@ -87,8 +87,22 @@
 	--text-label: 0.6875rem;
 	--text-label--line-height: 1.45;
 
-	/* The curve for every small transition on the site. */
-	--ease-ui: cubic-bezier(0.4, 0, 0.15, 1);
+	/*
+	 * The two curves apple.com moves with, measured off its product pages on 2026-11-19:
+	 * `ui` — soft out, soft in, no overshoot — on everything that changes state; `enter`
+	 * decelerates into place, for whatever arrives on screen. A third curve is a mistake.
+	 */
+	--ease-ui: cubic-bezier(0.4, 0, 0.6, 1);
+	--ease-enter: cubic-bezier(0, 0, 0.2, 1);
+
+	/* A frame arriving: it fades up the last 30px into place, as apple.com's content does. */
+	--animate-rise: rise var(--duration-reveal) var(--ease-enter) both;
+	@keyframes rise {
+		from {
+			opacity: 0;
+			translate: 0 1.875rem;
+		}
+	}
 
 	/* The bar on top below `lg`, and the column down the left from `lg` up. */
 	--spacing-header: 3rem;
@@ -109,8 +123,24 @@
 }
 
 @layer base {
+	/*
+	 * The house tempo, measured off apple.com: controls answer in 240–320ms (Tailwind's
+	 * `duration-300`), content arrives in about 650ms, nothing takes a second. Quick and soft
+	 * is the aesthetic — slow reads as heavy, not as considered.
+	 */
+	:root {
+		--duration-reveal: 650ms;
+		--duration-page: 350ms;
+		--duration-photo: 450ms;
+		--duration-step: 300ms;
+	}
+
 	html {
 		color-scheme: dark;
+		/* Phones flash a grey box over whatever is tapped; frames press in instead. */
+		-webkit-tap-highlight-color: transparent;
+		/* Where scrollbars take room, opening the enlarged view must not shift the page. */
+		scrollbar-gutter: stable;
 	}
 	/* The enlarged view is modal; the page behind it must not scroll along. */
 	html:has(dialog[open]) {
@@ -132,5 +162,52 @@
 		outline: 2px solid var(--color-relapse);
 		outline-offset: 3px;
 		border-radius: 2px;
+	}
+
+	/*
+	 * Frames further down the page rise into place as they are scrolled to (`reveal()` in
+	 * `src/lib/motion.ts`). The attribute is only ever set by script, on frames still below
+	 * the fold — so without JavaScript, or before it runs, every picture is simply there.
+	 */
+	[data-reveal] {
+		transition:
+			opacity var(--duration-reveal) var(--ease-ui),
+			translate var(--duration-reveal) var(--ease-enter);
+	}
+	[data-reveal="hidden"] {
+		opacity: 0;
+		translate: 0 1.875rem;
+		transition: none;
+	}
+
+	/*
+	 * View transitions: a page change is a short crossfade — the sidebar is the same pixels
+	 * on both sides and holds still — and an enlarged photograph grows out of its frame in
+	 * the grid. Both frames are drawn cropped to the box between them, so a 4:5 frame
+	 * opening into a landscape picture widens rather than stretches.
+	 */
+	::view-transition-group(*) {
+		animation-duration: var(--duration-page);
+		animation-timing-function: var(--ease-ui);
+	}
+	html[data-transition="photo"]::view-transition-group(*) {
+		animation-duration: var(--duration-photo);
+	}
+	html[data-transition="step"]::view-transition-group(*) {
+		animation-duration: var(--duration-step);
+	}
+	/* Written for every group, but only `photo` changes shape; the page's own never does. */
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		height: 100%;
+		object-fit: cover;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		::view-transition-group(*),
+		::view-transition-old(*),
+		::view-transition-new(*) {
+			animation: none;
+		}
 	}
 }

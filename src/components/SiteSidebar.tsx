@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { galleryGroups } from "#/content/galleries";
 import { site } from "#/content/site";
+import { riseDelay } from "#/lib/motion";
 
 /**
  * The site's chrome, all of it: the wordmark, one line saying whose work this is, and the
@@ -30,14 +31,15 @@ export function SiteSidebar() {
 	return (
 		<header className="sticky top-0 z-40 lg:static">
 			{/* Phone and tablet: the bar. */}
-			<div className="flex h-header items-center justify-between bg-canvas/90 px-4 backdrop-blur-xl sm:px-6 lg:hidden">
+			{/* Frosted, like the bar on apple.com: the pictures stay faintly visible under it. */}
+			<div className="flex h-header items-center justify-between bg-canvas/70 px-4 backdrop-blur-xl backdrop-saturate-180 sm:px-6 lg:hidden">
 				<Wordmark onClick={close} />
 				<button
 					type="button"
 					aria-expanded={menuOpen}
 					aria-controls="menue"
 					onClick={() => setMenuOpen((open) => !open)}
-					className="-mr-2 flex size-10 items-center justify-center"
+					className="-mr-3 flex size-11 items-center justify-center"
 				>
 					<span className="sr-only">{menuOpen ? site.menu.close : site.menu.open}</span>
 					<span aria-hidden="true" className="relative block size-4">
@@ -55,25 +57,35 @@ export function SiteSidebar() {
 				</button>
 			</div>
 
+			{/*
+			 * The menu fades in over the page and its list settles down into place; closing
+			 * fades it out before it is taken away (`transition-discrete`). Browsers without
+			 * `@starting-style` open and close it at once.
+			 */}
 			<div
 				id="menue"
-				hidden={!menuOpen}
-				className="fixed inset-x-0 top-header bottom-0 overflow-y-auto bg-canvas px-4 pt-6 pb-10 sm:px-6 lg:hidden"
+				className={`fixed inset-x-0 top-header bottom-0 overflow-y-auto overscroll-contain bg-canvas/80 px-4 pt-6 pb-10 backdrop-blur-2xl backdrop-saturate-180 transition-[opacity,display] transition-discrete duration-300 ease-ui starting:opacity-0 motion-reduce:transition-none sm:px-6 lg:hidden ${
+					menuOpen ? "" : "hidden opacity-0"
+				}`}
 			>
-				<Navigation size="large" onNavigate={close} />
+				<div className="transition-transform duration-300 ease-enter starting:-translate-y-2 motion-reduce:transition-none">
+					<Navigation size="large" onNavigate={close} />
+				</div>
 			</div>
 
-			{/* Desktop: the column. */}
+			{/* Desktop: the column. It rises in with the first frames when the site opens. */}
 			<div className="fixed inset-y-0 left-0 hidden w-sidebar flex-col overflow-y-auto px-10 py-12 lg:flex">
-				<Wordmark />
-				<p className="label mt-5 text-ink-muted">
+				<div className="motion-safe:animate-rise">
+					<Wordmark />
+				</div>
+				<p className="label mt-5 text-ink-muted motion-safe:animate-rise" style={riseDelay(1)}>
 					{site.tagline.map((line) => (
 						<span key={line} className="block">
 							{line}
 						</span>
 					))}
 				</p>
-				<div className="mt-14">
+				<div className="mt-14 motion-safe:animate-rise" style={riseDelay(2)}>
 					<Navigation size="small" />
 				</div>
 			</div>
@@ -110,10 +122,11 @@ const navGroups = site.nav
 	.filter((group) => group.length > 0);
 
 function Navigation({ size, onNavigate }: NavigationProps) {
+	// The phone menu's items are whole rows at least 44px tall, so a thumb cannot miss them.
 	const item =
 		size === "small"
 			? "font-display text-sm leading-7"
-			: "font-display text-2xl leading-tight tracking-brand";
+			: "block py-2 font-display text-2xl leading-tight tracking-brand";
 	const gap = size === "small" ? "mt-6" : "mt-8";
 
 	return (
@@ -121,12 +134,12 @@ function Navigation({ size, onNavigate }: NavigationProps) {
 			{navGroups.map((group, i) => (
 				<ul key={group.map((entry) => entry.to).join()} className={i > 0 ? gap : undefined}>
 					{group.map((entry) => (
-						<li key={entry.to} className={size === "large" ? "py-1.5" : undefined}>
+						<li key={entry.to}>
 							<Link
 								to={entry.to}
 								activeOptions={{ exact: true }}
 								onClick={onNavigate}
-								className={`${item} text-ink-muted transition-colors duration-300 hover:text-ink data-[status=active]:text-ink`}
+								className={`${item} text-ink-muted transition-colors duration-300 hover:text-ink active:text-ink data-[status=active]:text-ink`}
 							>
 								{entry.label}
 							</Link>
@@ -140,7 +153,9 @@ function Navigation({ size, onNavigate }: NavigationProps) {
 					target="_blank"
 					rel="noreferrer"
 					onClick={onNavigate}
-					className="label text-ink-muted transition-colors duration-300 hover:text-ink"
+					className={`label text-ink-muted transition-colors duration-300 hover:text-ink active:text-ink ${
+						size === "large" ? "inline-flex min-h-11 items-center" : ""
+					}`}
 				>
 					{site.author.handle} ↗
 				</a>

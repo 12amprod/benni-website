@@ -12,6 +12,9 @@ export const Route = createRootRoute({
 		meta: [
 			{ charSet: "utf-8" },
 			{ name: "viewport", content: "width=device-width, initial-scale=1" },
+			// The browser's own bars — Safari's, Chrome's on Android — take the page's black
+			// rather than framing it in grey.
+			{ name: "theme-color", content: "#000000" },
 			{ title: site.title },
 			{ name: "description", content: site.description },
 			{ property: "og:site_name", content: site.name },

@@ -1,10 +1,17 @@
 import { useCallback, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import type { ArchivePhoto } from "#/content/archive";
 import { type GalleryId, galleryGroups } from "#/content/galleries";
 import { site } from "#/content/site";
+import { transition } from "#/lib/motion";
+import { frameOf, preloadWhole } from "./Frame";
 import { Lightbox, type LightboxEntry } from "./Lightbox";
 import { WorkSeries } from "./WorkSeries";
 import { WorkTiles } from "./WorkTiles";
+
+/** How long a click waits for the whole picture before the frame starts to grow anyway. */
+const PRELOAD_GRACE_MS = 300;
+const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 
 type GalleryPageProps = {
 	id: GalleryId;
@@ -38,8 +45,37 @@ export function GalleryPage({ id }: GalleryPageProps) {
 		[groups],
 	);
 	const [open, setOpen] = useState<number | null>(null);
+
+	// Where each work's first frame falls on the page, counted from the top across every
+	// group, so the frames that rise in as the page opens are the ones on screen.
+	const firstFrame = useMemo(() => {
+		const at = new Map<string, number>();
+		let count = 0;
+		for (const group of groups) {
+			for (const work of group.works) {
+				at.set(work.url, count);
+				count += group.layout === "sheet" ? work.photos.length : 1;
+			}
+		}
+		return at;
+	}, [groups]);
+
+	/*
+	 * Into the enlarged view: the frame grows out of the grid into the whole picture. The
+	 * picture gets a moment to arrive first, so the frame grows into it rather than into an
+	 * empty box; on a slow line the box grows anyway and the picture fills it on arrival.
+	 */
 	const enlarge = useCallback(
-		(photo: ArchivePhoto) => setOpen(entries.findIndex((entry) => entry.photo === photo)),
+		async (photo: ArchivePhoto) => {
+			const at = entries.findIndex((entry) => entry.photo === photo);
+			const frame = frameOf(photo);
+			await Promise.race([preloadWhole(photo), wait(PRELOAD_GRACE_MS)]);
+			frame?.style.setProperty("view-transition-name", "photo");
+			transition("photo", () => {
+				frame?.style.removeProperty("view-transition-name");
+				flushSync(() => setOpen(at));
+			});
+		},
 		[entries],
 	);
 
@@ -82,12 +118,18 @@ export function GalleryPage({ id }: GalleryPageProps) {
 										work={work}
 										headingLevel={grouped ? 3 : 2}
 										eager={g === 0 && w === 0}
+										firstFrame={firstFrame.get(work.url) ?? 0}
 										onEnlarge={enlarge}
 									/>
 								))}
 							</div>
 						) : (
-							<WorkTiles works={group.works} eager={g === 0} onEnlarge={enlarge} />
+							<WorkTiles
+								works={group.works}
+								eager={g === 0}
+								firstFrame={firstFrame.get(group.works[0]?.url ?? "") ?? 0}
+								onEnlarge={enlarge}
+							/>
 						)}
 					</section>
 				))}

@@ -1,5 +1,5 @@
 import type { ArchivePhoto, ArchiveWork } from "#/content/archive";
-import { enlargeOnClick, FrameImage, frameLinkClass } from "./Frame";
+import { arrival, enlargeLink, FrameImage, frameLinkClass } from "./Frame";
 
 type WorkSeriesProps = {
 	work: ArchiveWork;
@@ -7,6 +7,8 @@ type WorkSeriesProps = {
 	headingLevel: 2 | 3;
 	/** The first work on the page: its first row is fetched immediately. */
 	eager?: boolean;
+	/** Where this series' first frame falls on the page, counting every frame above it. */
+	firstFrame: number;
 	onEnlarge: (photo: ArchivePhoto) => void;
 };
 
@@ -15,7 +17,13 @@ type WorkSeriesProps = {
  * two abreast. The line is the only text the series carries; what it was and where it was
  * posted is in the enlarged view, for whoever wants it.
  */
-export function WorkSeries({ work, headingLevel, eager = false, onEnlarge }: WorkSeriesProps) {
+export function WorkSeries({
+	work,
+	headingLevel,
+	eager = false,
+	firstFrame,
+	onEnlarge,
+}: WorkSeriesProps) {
 	const Heading = headingLevel === 2 ? "h2" : "h3";
 
 	return (
@@ -26,12 +34,8 @@ export function WorkSeries({ work, headingLevel, eager = false, onEnlarge }: Wor
 			</Heading>
 			<ul className="grid grid-cols-2 gap-3 sm:gap-6 lg:gap-10">
 				{work.photos.map((photo, i) => (
-					<li key={photo.src}>
-						<a
-							href={photo.full}
-							onClick={enlargeOnClick(() => onEnlarge(photo))}
-							className={frameLinkClass}
-						>
+					<li key={photo.src} {...arrival(firstFrame + i)}>
+						<a {...enlargeLink(photo, () => onEnlarge(photo))} className={frameLinkClass}>
 							<FrameImage photo={photo} eager={eager && i < 4} />
 						</a>
 					</li>

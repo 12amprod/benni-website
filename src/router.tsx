@@ -6,6 +6,9 @@ export function getRouter() {
 		routeTree,
 		scrollRestoration: true,
 		defaultPreload: "intent",
+		// Every page change is a view transition: a short crossfade, timed in `src/styles.css`.
+		// Browsers without the API simply change page, as before.
+		defaultViewTransition: true,
 	});
 }
 

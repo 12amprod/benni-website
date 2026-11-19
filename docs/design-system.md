@@ -94,54 +94,59 @@ Hand-rolling those five properties instead of using `label` is a violation.
 
 ## 4. Motion
 
-**Two easing curves. A third curve is a violation.**
+The bar is **apple.com**, measured off its iPhone and MacBook Pro pages on 2026-11-19 — not
+the slow, cinematic tempo `docs/bar.md` M7 recorded off remyshoots, which this replaces.
+Quick and soft is the aesthetic. Slow reads as heavy, not as considered.
 
-- `--ease-big: cubic-bezier(0.887, 0, 0.113, 1)` — anything large and spatial
-- `--ease-ui: cubic-bezier(0.4, 0, 0.15, 1)` — small UI
+**Two easing curves. A third curve is a violation.** Both are apple.com's own.
 
-**Durations in use** — these are the house tempo; slow is the aesthetic:
+- `--ease-ui: cubic-bezier(0.4, 0, 0.6, 1)` — anything changing state. Soft out, soft in, no
+  overshoot. (118 rules on the MacBook Pro page use it.)
+- `--ease-enter: cubic-bezier(0, 0, 0.2, 1)` — anything arriving on screen; it decelerates
+  into place.
 
-| What                    | Duration |
-| ----------------------- | -------- |
-| `.reveal` fade + rise   | `900ms`  |
-| `.mask-reveal` line     | `1100ms` |
-| `.wipe-reveal` clip     | `1100ms` |
-| `.plate` colour return  | `1200ms` |
-| `.diptych-half` flex    | `600ms`  |
-| Hero mask-up on load    | `1200ms` |
+**Durations** — tokens in `:root` in `src/styles.css`, except hover/press, which use Tailwind's
+`duration-300`:
 
-**Two tempos, and the band between them is empty.** This is measured off the reference
-(`docs/bar.md` M7), not invented:
+| What                                   | Duration | Token / class        |
+| -------------------------------------- | -------- | -------------------- |
+| Hover, press, menu, controls           | `300ms`  | `duration-300`       |
+| Page change (crossfade)                | `350ms`  | `--duration-page`    |
+| Photograph into / out of enlarged view | `450ms`  | `--duration-photo`   |
+| Stepping between enlarged photographs  | `300ms`  | `--duration-step`    |
+| A frame rising into place              | `650ms`  | `--duration-reveal`  |
 
-- **Controls and small UI: 250–450ms**, on `--ease-ui`. Hovering a control is immediate.
-- **Photographs changing state: 1100–1200ms**, on `--ease-big`. A picture moves cinematically.
-- **Nothing sits in the 500–1500ms band on a control**, and nothing under 1s on a photograph.
-  A 900ms hover is not "considered", it is sluggish; a 300ms photograph is not "snappy", it is
-  cheap. The 600ms diptych flex is the one legacy exception and should migrate to 450ms.
+Nothing takes a second. apple.com's controls run at 240–500ms and its content arrives in
+about 650ms; there is no third, slower tempo.
 
-Stagger between siblings is `90ms`, set via `--reveal-delay`.
+**How frames arrive — one movement, two triggers.** A frame fades up the last 30px into place
+(apple.com's StaggeredFadeIn), staggered 130ms from its neighbour, at most four steps deep:
 
-**Exactly three reveal modifiers exist, and an element carries at most one:**
+- The first six frames on a page, counted across all its groups, rise as the page opens —
+  `motion-safe:animate-rise`, a CSS animation that runs from first paint without JavaScript.
+- Every later frame waits below the fold and rises when it is scrolled to — `reveal()` in
+  `src/lib/motion.ts` sets `data-reveal` on it **on the client**, and only if it mounted below
+  the fold. Nothing on screen is ever hidden by script, so nothing flashes.
 
-| Class          | Behaviour            | For                    |
-| -------------- | -------------------- | ---------------------- |
-| `.reveal`      | fade + rise          | blocks of several things |
-| `.mask-reveal` | line out of a mask   | headlines              |
-| `.wipe-reveal` | `clip-path` wipe     | photographs            |
+**Nothing waits on JavaScript to become visible.** With JS disabled every picture is there; the
+opening frames still rise, because that is CSS.
 
-**Nothing on the page may start at `opacity: 0` in the prerendered HTML.** Reveals are driven
-by `data-reveal="pending"`, which is applied by `src/lib/scroll-motion.ts` **on the client**.
-With JS disabled the page must be complete and readable.
+**The enlarged view grows out of the grid** — the zoom of the iPhone's Photos app, as a view
+transition named `photo`: the frame grows into the whole picture and shrinks back into its
+place on close. The click waits up to 300ms for the picture so the frame grows into it.
 
-## 5. Reduced motion — tiered, not switched off
+**Surfaces over the page are frosted** — `backdrop-blur` with `backdrop-saturate-180` over a
+translucent `canvas`, as apple.com's bars are: the phone bar and the phone menu.
 
-`@media (prefers-reduced-motion: reduce)` must leave the page composed, not dead:
+**Not on this site, because apple.com has none of them:** a preloader or counter, a custom
+cursor, smooth-scroll hijacking, WebGL distortion, a bounce.
 
-- Tier 1: large travelling surfaces removed — `.scroll-zoom`, `.hero-exit` get `transform: none`,
-  `scroll-behavior: auto`.
-- Tier 2: displacement removed but a **220ms cross-fade remains** — `.reveal` keeps opacity,
-  loses transform; `.mask-reveal` and `.wipe-reveal` collapse to the same fade.
-- The diptych hover-grow does not run at all.
+## 5. Reduced motion — nothing moves
+
+With `prefers-reduced-motion: reduce` the page is complete and still: no opening rise
+(`motion-safe:`), no scroll reveal (`prefersMotion()` in `src/lib/motion.ts`), no view
+transitions (neither started nor animated), no menu fade. Every state change still happens —
+it simply happens at once.
 
 ## 6. Layout & spacing
 

@@ -90,6 +90,9 @@ be ~40px. Chrome sitting in its own opaque band above the photos, rather than ov
 
 ## M7 — Two tempos, and nothing in between
 
+> **Superseded 2026-11-19.** The motion bar is now apple.com — quick and soft, nothing over a
+> second. See `docs/design-system.md` §4. The measurement below stays as a record.
+
 Measured transition durations across the DOM: `0.25s` ×7, `0.3s` ×40, `0.35s` ×2, `0.45s` ×26.
 Measured custom properties: `--vt-stage-dur: 1.6s`, `--vt-leave-dur: 1.6s`, `--vt-cross-dur: 1.6s`,
 `--vt-cross-delay: .33s`, `--vt-meta-dur: .45s`.

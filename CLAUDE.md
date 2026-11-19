@@ -59,6 +59,9 @@ and hands the errors back — fix them, never disable or work around them.
 - `scripts/pull-archive.ts` — the build-time bridge from Sanity to the site.
 - `src/styles.css` — the Tailwind entry point and the design tokens (`@theme`). There is no
   `tailwind.config.js` in Tailwind v4; tokens are CSS variables in this file.
+- `src/lib/motion.ts` — every movement the site makes in script: the view transitions
+  (page change, the enlarged view), the scroll reveal, and whether to move at all. Timings and
+  curves are tokens in `src/styles.css`; the bar is apple.com (`docs/design-system.md` §4).
 - `src/test/` — Vitest setup plus `renderWithRouter()`, which you need for any component
   that uses `<Link>` or a router hook.
 - Import with the `#/*` alias (`#/components/SiteHeader`), never `../../components/...`.
